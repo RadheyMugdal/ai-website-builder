@@ -46,6 +46,7 @@
     "@trpc/react-query": "^11.4.3",
     "@trpc/server": "^11.4.3",
     "@trpc/tanstack-react-query": "^11.4.3",
+    "better-auth": "^1.2.12",
     "class-variance-authority": "^0.7.1",
     "client-only": "^0.0.1",
     "clsx": "^2.1.1",
@@ -62,6 +63,7 @@
     "react-day-picker": "^9.8.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.60.0",
+    "react-icons": "^5.5.0",
     "react-resizable-panels": "^3.0.3",
     "react-useanimations": "^2.10.0",
     "recharts": "^3.1.0",
@@ -70,7 +72,8 @@
     "superjson": "^2.2.2",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.6",

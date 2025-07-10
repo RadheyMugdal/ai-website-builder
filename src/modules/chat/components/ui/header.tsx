@@ -1,17 +1,23 @@
 "use client";
+import Logo from "@/components/global/logo";
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { Hamburger, Menu } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
+import { LuWaves } from "react-icons/lu";
 
 const Header = () => {
+  const session = authClient.useSession();
   const [isOpen, setIsOpen] = React.useState(false);
+  const router = useRouter();
   return (
     <header className=" py-2 px-8 relative ">
       <div className="flex  justify-between">
         <div className="flex gap-12 items-center">
-          <h1 className="text-xl font-bold">❤️Lovable</h1>
+          <Logo />
           <nav className=" hidden md:block">
             <ul className="flex gap-4">
               <li>
@@ -76,12 +82,21 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <div className=" gap-3 hidden md:flex">
-          <Button variant={"secondary"} size={"sm"}>
-            Login
-          </Button>
-          <Button size={"sm"}>Get started</Button>
-        </div>
+        {!session.data?.user && (
+          <div className=" gap-3 hidden md:flex">
+            <Button
+              variant={"secondary"}
+              size={"sm"}
+              onClick={() => router.push("/sign-in")}
+            >
+              Login
+            </Button>
+            <Button size={"sm"} onClick={() => router.push("/sign-in")}>
+              Get started
+            </Button>
+          </div>
+        )}
+
         <button
           type="button"
           className=" md:hidden hover:bg-secondary p-1 rounded-md"
