@@ -1,9 +1,12 @@
+import { uuid } from "drizzle-orm/gel-core";
 import {
   pgTable,
   text,
   timestamp,
   boolean,
   integer,
+  jsonb,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -65,3 +68,44 @@ export const verification = pgTable("verification", {
     () => /* @__PURE__ */ new Date()
   ),
 });
+
+export const statusEnum = pgEnum("status", [
+  "pending",
+  "generating",
+  "running",
+  "failed",
+]);
+
+export const project = pgTable("project", (t) => ({
+  id: t.uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().default("Next js project"),
+  sandboxId: text("sandbox_id"),
+  previewUrl: text("preview_url"),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  status: statusEnum("status").notNull().default("pending"),
+  files: jsonb("files").notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+}));
+
+export const roleEnum = pgEnum("role", ["user", "assistant"]);
+export const message = pgTable("message", (t) => ({
+  id: t.uuid("id").primaryKey().defaultRandom(),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => project.id, { onDelete: "cascade" }),
+  role: roleEnum("role").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+}));

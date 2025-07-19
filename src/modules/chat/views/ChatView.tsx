@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/prompt-input";
 import { authClient } from "@/lib/auth-client";
 import { useLoginDialogStore } from "@/modules/auth/store/login-dialog-store";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+
 import { ArrowUp, Square } from "lucide-react";
 import React, { useState } from "react";
 
@@ -17,16 +20,16 @@ const ChatView = () => {
   const { setOpen } = useLoginDialogStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const trpc = useTRPC();
+  const createProject = useMutation(trpc.project.create.mutationOptions());
+  const handleSubmit = async () => {
     if (!data?.user) {
       setOpen(true);
       return;
     }
     setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+    // await createProject.mutate({ prompt: input });
+    setIsLoading(false);
   };
 
   const handleValueChange = (value: string) => {
