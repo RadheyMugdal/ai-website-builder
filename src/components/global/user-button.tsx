@@ -26,11 +26,11 @@ const UserButton = () => {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className=" ">
+      <DropdownMenuContent align="end" className=" min-w-[230px]">
         <DropdownMenuLabel>Profile</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        {/* <DropdownMenuSeparator /> */}
 
-        <div>
+        <div className=" py-2">
           <div className=" flex gap-2 items-center">
             <Avatar>
               <AvatarImage src={session?.data.user.image!} />
@@ -50,8 +50,9 @@ const UserButton = () => {
             authClient.signOut();
             router.push("/sign-in");
           }}
+          className=" py-3 items-center"
         >
-          <LogOut />
+          <LogOut className=" size-5" />
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
