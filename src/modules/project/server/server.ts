@@ -3,7 +3,7 @@ import { message, project } from "@/db/schema";
 import { inngest } from "@/inngest/client";
 import { templateFiles } from "@/lib/template";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { Daytona } from "@daytonaio/sdk";
+import { Daytona, Sandbox } from "@daytonaio/sdk";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import z from "zod";
@@ -75,12 +75,19 @@ export const projectRouter = createTRPCRouter({
 
       if (existingProject.sandboxId) {
         const sandbox = await daytona.get(existingProject.sandboxId);
+        const previewlink = await sandbox.getPreviewLink(3000);
+        await db
+          .update(project)
+          .set({ previewUrl: previewlink.url })
+          .where(eq(project.id, id));
+
         if (sandbox.state === "archived") {
           await daytona.start(sandbox);
         } else if (sandbox.state === "started") {
           sandbox.process.executeCommand("true");
         }
       }
+
       const messages = await db
         .select()
         .from(message)
