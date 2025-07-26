@@ -10,16 +10,18 @@ import { authClient } from "@/lib/auth-client";
 import { useLoginDialogStore } from "@/modules/auth/store/login-dialog-store";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import { ArrowUp, Square } from "lucide-react";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const ChatView = () => {
   const { data } = authClient.useSession();
   const [input, setInput] = useState("");
   const { setOpen } = useLoginDialogStore();
   const [isLoading, setIsLoading] = useState(false);
-
+  const router = useRouter();
   const trpc = useTRPC();
   const createProject = useMutation(trpc.project.create.mutationOptions());
   const handleSubmit = async () => {
@@ -27,9 +29,18 @@ const ChatView = () => {
       setOpen(true);
       return;
     }
+
     setIsLoading(true);
-    // await createProject.mutate({ prompt: input });
-    setIsLoading(false);
+
+    try {
+      const created = await createProject.mutateAsync({ prompt: input });
+      toast.success("Project created successfully");
+      router.push(`/project/${created.id}`);
+    } catch (err: any) {
+      toast.error(err?.message ?? "Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleValueChange = (value: string) => {
@@ -53,7 +64,6 @@ const ChatView = () => {
               variant="default"
               size="icon"
               className="h-8 w-8 rounded-full"
-              onClick={handleSubmit}
             >
               {isLoading ? (
                 <Square className="size-5 fill-current" />
