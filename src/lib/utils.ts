@@ -21,17 +21,12 @@ export function lastAssistantTextMessage(result: AgentResult) {
       : message.content.join("")
     : undefined;
 }
-
 export function updateOrCreateFile(file: TemplateFile, files: TemplateFile[]) {
-  const existingFile = files.find((f) => f.path === file.path);
-  if (existingFile) {
-    return [
-      ...files,
-      {
-        ...existingFile,
-        content: file.content,
-      },
-    ];
+  const index = files.findIndex((f) => f.path === file.path);
+  if (index !== -1) {
+    const updatedFiles = [...files];
+    updatedFiles[index] = { ...files[index], content: file.content };
+    return updatedFiles;
   } else {
     return [...files, file];
   }
@@ -40,3 +35,22 @@ export function updateOrCreateFile(file: TemplateFile, files: TemplateFile[]) {
 export function removeFile(file: TemplateFile, files: TemplateFile[]) {
   return files.filter((f) => f.path !== file.path);
 }
+export type PreviewDevice = {
+  name: string;
+  width: string;
+};
+
+export const previewDevices: PreviewDevice[] = [
+  {
+    name: "Desktop",
+    width: "100%",
+  },
+  {
+    name: "Tablet",
+    width: "60%",
+  },
+  {
+    name: "Mobile",
+    width: "40%",
+  },
+];

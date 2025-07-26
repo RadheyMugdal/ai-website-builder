@@ -8,11 +8,14 @@ export async function middleware(request: NextRequest) {
   if (!session) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
+  if (request.nextUrl.pathname === "/sign-in" && session.user) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   return NextResponse.next();
 }
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/project/:path*", "/api/trpc/:path*", "/api/inngest/:path*"],
+  matcher: ["/project/:path*"],
 };

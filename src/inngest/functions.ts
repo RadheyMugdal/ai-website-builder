@@ -13,24 +13,39 @@ import { TemplateFile } from "@/lib/template";
 
 export const generateCode = inngest.createFunction(
   { id: "generate-code" },
-  { event: "code/generate" },
+  {
+    event: "code/generate",
+  },
 
-  async ({ event, step }) => {
+  async ({ event, step, logger }) => {
     const daytona = new Daytona({
       apiKey: process.env.DAYTONA_API_KEY,
       apiUrl: process.env.DAYTONA_API_URL,
       target: "us",
     });
 
-    const sandboxId = await step.run("create-sandbox", async () => {
-      const sandbox = await daytona.create({
-        snapshot: "nextjs-template",
-        autoStopInterval: 10,
-        autoArchiveInterval: 10,
-      });
+    let sandboxId: string;
 
-      return sandbox.id;
-    });
+    if (!event.data.sandboxId) {
+      sandboxId = await step.run("create-sandbox", async () => {
+        const sandbox = await daytona.create({
+          snapshot: "test",
+          autoStopInterval: 10,
+          autoArchiveInterval: 10,
+          public: true,
+        });
+
+        return sandbox.id;
+      });
+    } else {
+      sandboxId = await step.run("ensure-sandbox-running", async () => {
+        const sandbox = await daytona.get(event.data.sandboxId);
+        if (sandbox.state === "stopped" || sandbox.state === "archived") {
+          await daytona.start(sandbox);
+        }
+        return sandbox.id;
+      });
+    }
 
     const updateProject = await step.run("update-project", async () => {
       await db
@@ -91,7 +106,7 @@ export const generateCode = inngest.createFunction(
                   const updatedFiles = network.state.data.files ?? [];
                   for (const file of files) {
                     const fileContent = Buffer.from(file.content);
-                    const res = await sandbox.fs.uploadFile(
+                    await sandbox.fs.uploadFile(
                       fileContent,
                       `/home/user/nextjs-app/${file.filePath}`
                     );
@@ -143,7 +158,12 @@ export const generateCode = inngest.createFunction(
           const lastAssistantMessage = lastAssistantTextMessage(result);
           if (lastAssistantMessage && network) {
             if (lastAssistantMessage.includes("<task_summary>")) {
-              network.state.data.summary = lastAssistantMessage;
+              const match = lastAssistantMessage.match(
+                /<task_summary>([\s\S]*?)<\/task_summary>/
+              );
+              if (match && match[1]) {
+                network.state.data.summary = match[1].trim();
+              }
             }
           }
           return result;
@@ -164,7 +184,23 @@ export const generateCode = inngest.createFunction(
       },
     });
 
-    const result = await network.run(event.data.prompt);
+    const previousConversations = await step.run(
+      "get-previous-messages",
+      async () => {
+        const messages = await db
+          .select()
+          .from(message)
+          .where(eq(message.projectId, event.data.projectId));
+        return messages;
+      }
+    );
+
+    const result = await network.run(
+      event.data.prompt +
+        `here is the conversation history: ${JSON.stringify(
+          previousConversations
+        )}`
+    );
 
     const url = await step.run("preview-url", async () => {
       const sandbox = await daytona.get(sandboxId);
@@ -192,13 +228,11 @@ export const generateCode = inngest.createFunction(
           files,
         })
         .where(eq(project.id, event.data.projectId));
-      const updatedMessage = await db
-        .update(message)
-        .set({
-          content: result.state.data.summary,
-          role: "assistant",
-        })
-        .where(eq(message.projectId, event.data.projectId));
+      const updatedMessage = await db.insert(message).values({
+        content: result.state.data.summary,
+        role: "assistant",
+        projectId: event.data.projectId,
+      });
     });
   }
 );

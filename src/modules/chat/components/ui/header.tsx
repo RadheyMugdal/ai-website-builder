@@ -8,11 +8,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { LuWaves } from "react-icons/lu";
-
-const Header = () => {
-  const session = authClient.useSession();
+interface Props {
+  isLoggedIn: boolean;
+}
+const Header = ({ isLoggedIn }: Props) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
+
   return (
     <header className=" py-2 px-8 relative ">
       <div className="flex  justify-between">
@@ -82,7 +84,7 @@ const Header = () => {
             </div>
           </div>
         </div>
-        {!session.data?.user && (
+        {!isLoggedIn && (
           <div className=" gap-3 hidden md:flex">
             <Button
               variant={"secondary"}
