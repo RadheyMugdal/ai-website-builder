@@ -1,21 +1,34 @@
 import Loader from "@/components/global/loader";
 import { auth } from "@/lib/auth";
+import { DEFAULT_PAGE_SIZE } from "@/modules/chat/constants";
+import { loadSearchParams } from "@/modules/chat/params";
 import ChatView from "@/modules/chat/views/ChatView";
 import HomePageView from "@/modules/chat/views/HomePageView";
 import ProjectsView from "@/modules/chat/views/ProjectsView";
 import { getQueryClient, trpc } from "@/trpc/server";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary, useInfiniteQuery } from "@tanstack/react-query";
 import { headers } from "next/headers";
+import { SearchParams } from "nuqs";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 const page = async () => {
   const queryClient = getQueryClient();
   const session = await auth.api.getSession({ headers: await headers() });
-
   if (session) {
-    void queryClient.prefetchQuery(trpc.project.getUserProjects.queryOptions());
+    void queryClient.prefetchInfiniteQuery(
+      trpc.project.getUserProjects.infiniteQueryOptions(
+        {
+          cursor: undefined,
+          limit: DEFAULT_PAGE_SIZE,
+        },
+        {
+          getNextPageParam: (lastPage) => lastPage.nextCursor,
+        }
+      )
+    );
   }
+
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

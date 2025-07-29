@@ -2,20 +2,60 @@ import { db } from "@/db";
 import { message, project } from "@/db/schema";
 import { inngest } from "@/inngest/client";
 import { templateFiles } from "@/lib/template";
+import { DEFAULT_PAGE_SIZE } from "@/modules/chat/constants";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { Daytona, Sandbox } from "@daytonaio/sdk";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, count, desc, eq, like, lt, or, sql } from "drizzle-orm";
 import z from "zod";
 
 export const projectRouter = createTRPCRouter({
-  getUserProjects: protectedProcedure.query(async ({ ctx }) => {
-    const projects = await db
-      .select()
-      .from(project)
-      .where(eq(project.userId, ctx.auth.user.id));
-    return projects;
-  }),
+  getUserProjects: protectedProcedure
+    .input(
+      z.object({
+        cursor: z
+          .object({
+            createdAt: z.string(),
+            id: z.string(),
+          })
+          .optional(),
+        limit: z.number().default(DEFAULT_PAGE_SIZE),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      let whereClause;
+      if (input.cursor) {
+        whereClause =and(
+          eq(project.userId,ctx.auth.user.id),
+           or(
+          lt(project.createdAt, new Date(input.cursor.createdAt)),
+          and(
+            eq(project.createdAt, new Date(input.cursor.createdAt)),
+            lt(project.id, input.cursor.id)
+          )
+        )
+        )
+      }
+      const projects = await db
+        .select()
+        .from(project)
+        .where(whereClause)
+        .limit(input.limit + 1)
+        .orderBy(desc(project.createdAt), desc(project.id));
+      let nextCursor;
+      if (projects.length > input.limit) {
+        const lastProject = projects.pop();
+        nextCursor = {
+          id: lastProject!.id,
+          createdAt: lastProject!.createdAt,
+        };
+      }
+
+      return {
+        projects,
+        nextCursor,
+      };
+    }),
   create: protectedProcedure
     .input(z.object({ prompt: z.string() }))
     .mutation(async ({ ctx, input }) => {
