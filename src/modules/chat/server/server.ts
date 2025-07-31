@@ -15,7 +15,7 @@ export const messageRouter = createTRPCRouter({
       const usage = await getUsageStatusByUserId(ctx.auth.user.id, ctx.subscriptionStatus as any)
       if (usage?.remainingPoints === 0) {
         throw new TRPCError({
-          code: "BAD_REQUEST",
+          code: "TOO_MANY_REQUESTS",
           message: "Not enough credits",
         });
       }

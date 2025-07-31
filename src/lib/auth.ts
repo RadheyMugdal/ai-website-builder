@@ -17,6 +17,18 @@ export const auth = betterAuth({
     provider: "pg",
     schema,
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user, ctx) => {
+          const [createdSubscription] = await db.insert(subscription).values({
+            userId: user.id,
+            status: "Free"
+          }).returning()
+        }
+      }
+    }
+  },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -39,12 +51,6 @@ export const auth = betterAuth({
         portal(),
         webhooks({
           secret: process.env.POLAR_WEBHOOK_SECRET!,
-          async onCustomerCreated(payload) {
-            await db.insert(subscription).values({
-              userId: payload.data.externalId!,
-              status: "Free"
-            })
-          },
           async onSubscriptionCreated(payload) {
             const subscriptionPlan = payload.data.product.name
             const subscriptionId = payload.data.id

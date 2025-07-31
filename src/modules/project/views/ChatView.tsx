@@ -58,16 +58,19 @@ const ChatView = ({
   )
   const handleSubmit = async () => {
     setIsLoading(true);
-    const newUserMessage = await createMessage.mutateAsync({
-      message: input,
-      projectId: projectData.id,
-    });
-    if (createMessage.isError) {
-      toast.error(createMessage.error.message);
-      setIsLoading(false);
-      return;
+    try {
+      const newUserMessage = await createMessage.mutateAsync({
+        message: input,
+        projectId: projectData.id,
+      });
+      setMessages([...messages, newUserMessage]);
+    } catch (error) {
+      if (createMessage.isError) {
+        toast.error(createMessage.error.message);
+        setIsLoading(false);
+        return;
+      }
     }
-    setMessages([...messages, newUserMessage]);
     setInput("");
     setIsLoading(false);
   };
