@@ -37,7 +37,7 @@ const ChatView = () => {
       toast.success("Project created successfully");
       router.push(`/project/${created.id}`);
     } catch (err: any) {
-      toast.error(err?.message ?? "Something went wrong");
+      toast.error(err?.message ??   "Something went wrong");
     } finally {
       setIsLoading(false);
     }

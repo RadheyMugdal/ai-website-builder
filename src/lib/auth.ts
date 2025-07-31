@@ -2,6 +2,15 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import * as schema from "@/db/schema";
 import { db } from "@/db/index";
+import { checkout, polar, portal, usage, webhooks } from "@polar-sh/better-auth"
+import { polarClient } from "./polar";
+import { dataTagErrorSymbol } from "@tanstack/react-query";
+import { DURATION, getUsageTracker, plan } from "./usage";
+import { PgEnum } from "drizzle-orm/pg-core";
+import { SubscriptionStatus } from "@polar-sh/sdk/models/components/subscriptionstatus.js";
+import { eq } from "drizzle-orm";
+import { subscription } from "../db/schema";
+
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -18,4 +27,63 @@ export const auth = betterAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     },
   },
+  plugins: [
+    polar({
+      client: polarClient,
+      createCustomerOnSignUp: true,
+      use: [
+        checkout({
+          successUrl: "/",
+          authenticatedUsersOnly: true,
+        }),
+        portal(),
+        webhooks({
+          secret: process.env.POLAR_WEBHOOK_SECRET!,
+          async onCustomerCreated(payload) {
+            await db.insert(subscription).values({
+              userId: payload.data.externalId!,
+              status: "Free"
+            })
+          },
+          async onSubscriptionCreated(payload) {
+            const subscriptionPlan = payload.data.product.name
+            const subscriptionId = payload.data.id
+            const userId = payload.data.customer.externalId
+            await db.update(subscription).set({
+              id: subscriptionId,
+              status: subscriptionPlan as any
+            }).where(
+              eq(subscription.userId, userId!)
+            )
+            return
+          },
+          async onSubscriptionUpdated(payload) {
+            const subscriptionPlan = payload.data.product.name
+            const subscriptionId = payload.data.id
+            const userId = payload.data.customer.externalId
+            await db.update(subscription).set({
+              status: subscriptionPlan as any
+            }).where(
+              eq(subscription.userId, userId!)
+            )
+            const usageTracker = await getUsageTracker(subscriptionPlan as plan)
+            await usageTracker.set(payload.data.customer.externalId!, 0, DURATION)
+            return
+          },
+          async onSubscriptionCanceled(payload) {
+            const subscriptionPlan = payload.data.product.name
+            const subscriptionId = payload.data.id
+            const userId = payload.data.customer.externalId
+            await db.update(subscription).set({
+              status: subscriptionPlan as any
+            }).where(
+              eq(subscription.userId, userId!)
+            )
+            return
+          },
+
+        })
+      ]
+    })
+  ]
 });

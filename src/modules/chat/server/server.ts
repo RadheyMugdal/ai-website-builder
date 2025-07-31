@@ -1,6 +1,8 @@
 import { db } from "@/db";
 import { message, project } from "@/db/schema";
 import { inngest } from "@/inngest/client";
+import { polarClient } from "@/lib/polar";
+import { getUsageStatusByUserId, plan } from "@/lib/usage";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
@@ -10,6 +12,13 @@ export const messageRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ message: z.string(), projectId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const usage = await getUsageStatusByUserId(ctx.auth.user.id, ctx.subscriptionStatus as any)
+      if (usage?.remainingPoints === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Not enough credits",
+        });
+      }
       const [existingProject] = await db
         .select()
         .from(project)
@@ -50,6 +59,7 @@ export const messageRouter = createTRPCRouter({
           prompt: input.message,
           projectId: input.projectId,
           sandboxId: existingProject.sandboxId,
+          plan: ctx.subscriptionStatus
         },
       });
       return createdMessage;

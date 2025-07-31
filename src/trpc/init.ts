@@ -1,5 +1,8 @@
+import { db } from "@/db";
+import { subscription } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { initTRPC, TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { cache } from "react";
 export const createTRPCContext = cache(async () => {
@@ -30,10 +33,15 @@ export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!session) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
   }
+  const [userSubscription] = await db.select({
+    status: subscription.status
+  }).from(subscription).where(eq(subscription.userId, session.user.id))
+
   return next({
     ctx: {
       ...ctx,
       auth: session,
+      subscriptionStatus: userSubscription.status
     },
   });
 });

@@ -9,7 +9,7 @@ import {
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { authClient } from "@/lib/auth-client";
-import { LogOut } from "lucide-react";
+import { DollarSign, Gem, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const UserButton = () => {
@@ -27,7 +27,7 @@ const UserButton = () => {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className=" min-w-[230px]">
-        <DropdownMenuLabel>Profile</DropdownMenuLabel>
+        {/* <DropdownMenuLabel>Profile</DropdownMenuLabel> */}
         {/* <DropdownMenuSeparator /> */}
 
         <div className=" py-2">
@@ -45,14 +45,24 @@ const UserButton = () => {
           </div>
         </div>
         <DropdownMenuSeparator />
+
+        <DropdownMenuItem onClick={async () => {
+          await authClient.customer.portal()
+        }}>
+          <Gem />
+          <p>Manage subscription</p>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+
         <DropdownMenuItem
+          variant="destructive"
           onClick={() => {
             authClient.signOut();
             router.push("/sign-in");
           }}
-          className=" py-3 items-center"
+
         >
-          <LogOut className=" size-5" />
+          <LogOut />
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>

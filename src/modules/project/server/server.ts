@@ -1,7 +1,9 @@
 import { db } from "@/db";
 import { message, project } from "@/db/schema";
 import { inngest } from "@/inngest/client";
+import { polarClient } from "@/lib/polar";
 import { templateFiles } from "@/lib/template";
+import { getUsageStatusByUserId, plan } from "@/lib/usage";
 import { DEFAULT_PAGE_SIZE } from "@/modules/chat/constants";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { Daytona, Sandbox } from "@daytonaio/sdk";
@@ -23,17 +25,17 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      let whereClause;
+      let whereClause: any = eq(project.userId, ctx.auth.user.id);
       if (input.cursor) {
-        whereClause =and(
-          eq(project.userId,ctx.auth.user.id),
-           or(
-          lt(project.createdAt, new Date(input.cursor.createdAt)),
-          and(
-            eq(project.createdAt, new Date(input.cursor.createdAt)),
-            lt(project.id, input.cursor.id)
+        whereClause = and(
+          eq(project.userId, ctx.auth.user.id),
+          or(
+            lt(project.createdAt, new Date(input.cursor.createdAt)),
+            and(
+              eq(project.createdAt, new Date(input.cursor.createdAt)),
+              lt(project.id, input.cursor.id)
+            )
           )
-        )
         )
       }
       const projects = await db
@@ -59,6 +61,13 @@ export const projectRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ prompt: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const usage = await getUsageStatusByUserId(ctx.auth.user.id, ctx.subscriptionStatus as any)
+      if (usage?.remainingPoints === 0) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Not enough credits",
+        });
+      }
       const [createdProject] = await db
         .insert(project)!
         .values({

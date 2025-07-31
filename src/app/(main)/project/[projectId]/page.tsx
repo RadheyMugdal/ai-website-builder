@@ -21,8 +21,15 @@ const page = async ({ params }: Props) => {
 
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(
+    trpc.pricing.getCredits.queryOptions()
+  )
+  void queryClient.prefetchQuery(
     trpc.project.getById.queryOptions({ id: projectId })
   );
+  void queryClient.prefetchQuery(
+    trpc.pricing.getCurrentSubscription.queryOptions()
+  )
+
 
   return (
     <>

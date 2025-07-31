@@ -1,115 +1,117 @@
 "use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import Logo from "@/components/global/logo";
 import UserButton from "@/components/global/user-button";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { Hamburger, Menu } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { LuWaves } from "react-icons/lu";
+
 interface Props {
   isLoggedIn: boolean;
 }
+
+const navLinks = [
+  { href: "/", label: "Home" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/about", label: "About Us" },
+];
+
 const Header = ({ isLoggedIn }: Props) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
+  const handleLinkClick = (href: string) => {
+    setIsOpen(false);
+    router.push(href);
+  };
+
   return (
-    <header className=" py-2 px-8 relative ">
-      <div className="flex  justify-between">
-        <div className="flex gap-12 items-center">
+    <header className="px-6 py-4  bg-background">
+      <div className="flex items-center justify-between">
+        {/* Left: Logo & Desktop Nav */}
+        <div className="flex items-center gap-8">
           <Logo />
-          <nav className=" hidden md:block">
-            <ul className="flex gap-4">
-              <li>
-                <Link href={"/"} className=" hover:underline hover:text-accent">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={"/pricing"}
-                  className=" hover:underline hover:text-accent"
-                >
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={"/about"}
-                  className=" hover:underline hover:text-accent"
-                >
-                  About us
-                </Link>
-              </li>
+          <nav className="hidden md:block">
+            <ul className="flex gap-6 text-sm font-medium">
+              {navLinks.map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="hover:underline hover:text-accent transition-colors"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
         </div>
-        <div
-          className={cn(
-            " absolute inset-x-0 top-full bg-background    border-b py-4  md:hidden",
-            isOpen ? "absolute" : "hidden"
-          )}
-        >
-          <div className="flex  flex-col gap-8 px-8 ">
-            <ul className="flex flex-col items-center gap-4">
-              <li>
-                <Link href={"/"} className=" hover:underline hover:text-accent">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={"/pricing"}
-                  className=" hover:underline hover:text-accent"
-                >
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={"/about"}
-                  className=" hover:underline hover:text-accent"
-                >
-                  About us
-                </Link>
-              </li>
-            </ul>
-            <div className="flex flex-col gap-3  ">
-              <Button variant={"secondary"} size={"sm"}>
+
+        {/* Right: Auth or User */}
+        <div className="hidden md:flex items-center gap-3">
+          {isLoggedIn ? (
+            <UserButton />
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => router.push("/sign-in")}
+              >
                 Login
               </Button>
-              <Button size={"sm"}>Get started</Button>
-            </div>
-          </div>
+              <Button size="sm" onClick={() => router.push("/sign-in")}>
+                Get Started
+              </Button>
+            </>
+          )}
         </div>
-        {isLoggedIn ? (
-          <UserButton />
-        ) : (
-          <div className=" gap-3 hidden md:flex">
-            <Button
-              variant={"secondary"}
-              size={"sm"}
-              onClick={() => router.push("/sign-in")}
-            >
-              Login
-            </Button>
-            <Button size={"sm"} onClick={() => router.push("/sign-in")}>
-              Get started
-            </Button>
-          </div>
-        )}
 
+        {/* Mobile Menu Toggle */}
         <button
           type="button"
-          className=" md:hidden hover:bg-secondary p-1 rounded-md"
+          aria-label="Toggle menu"
           onClick={() => setIsOpen((prev) => !prev)}
+          className="md:hidden p-2 rounded-md hover:bg-muted"
         >
-          <Menu />
+          {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden mt-4 border-t pt-4">
+          <ul className="flex flex-col gap-4 text-sm font-medium">
+            {navLinks.map(({ href, label }) => (
+              <li key={href}>
+                <button
+                  onClick={() => handleLinkClick(href)}
+                  className="w-full text-left px-2 py-1 hover:underline hover:text-accent"
+                >
+                  {label}
+                </button>
+              </li>
+            ))}
+          </ul>
+          {!isLoggedIn && (
+            <div className="mt-6 flex flex-col gap-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleLinkClick("/sign-in")}
+              >
+                Login
+              </Button>
+              <Button size="sm" onClick={() => handleLinkClick("/sign-in")}>
+                Get Started
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </header>
   );
 };

@@ -10,6 +10,7 @@ import { db } from "@/db";
 import { message, project } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { TemplateFile } from "@/lib/template";
+import { consumeUserIdCredit } from "@/lib/usage";
 
 export const generateCode = inngest.createFunction(
   { id: "generate-code" },
@@ -197,9 +198,9 @@ export const generateCode = inngest.createFunction(
 
     const result = await network.run(
       event.data.prompt +
-        `here is the conversation history: ${JSON.stringify(
-          previousConversations
-        )}`
+      `here is the conversation history: ${JSON.stringify(
+        previousConversations
+      )}`
     );
 
     const url = await step.run("preview-url", async () => {
@@ -212,6 +213,7 @@ export const generateCode = inngest.createFunction(
       const [existingProject] = await db
         .select({
           files: project.files,
+          userId: project.userId
         })
         .from(project)
         .where(eq(project.id, event.data.projectId));
@@ -233,6 +235,7 @@ export const generateCode = inngest.createFunction(
         role: "assistant",
         projectId: event.data.projectId,
       });
+      await consumeUserIdCredit(existingProject.userId, event.data.plan)
     });
   }
 );
