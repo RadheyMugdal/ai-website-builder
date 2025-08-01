@@ -1,3 +1,4 @@
+import ErrorState from "@/components/global/error-state";
 import Loader from "@/components/global/loader";
 import { auth } from "@/lib/auth";
 import ProjectView from "@/modules/project/ui/views/ProjectView";
@@ -32,15 +33,15 @@ const page = async ({ params }: Props) => {
 
 
   return (
-    <>
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <ErrorBoundary fallback={<div>Error</div>}>
-          <Suspense fallback={<Loader />}>
-            <ProjectView projectId={projectId} />
-          </Suspense>
-        </ErrorBoundary>
-      </HydrationBoundary>
-    </>
+
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ErrorBoundary fallback={<ErrorState title="Failed to load project" description="Please try again later" />}>
+        <Suspense fallback={<Loader />}>
+          <ProjectView projectId={projectId} />
+        </Suspense>
+      </ErrorBoundary>
+    </HydrationBoundary>
+
   );
 };
 

@@ -1,3 +1,4 @@
+import ErrorState from "@/components/global/error-state";
 import Loader from "@/components/global/loader";
 import { auth } from "@/lib/auth";
 import { DEFAULT_PAGE_SIZE } from "@/modules/chat/constants";
@@ -11,6 +12,7 @@ import { ErrorBoundary } from "react-error-boundary";
 const page = async () => {
   const queryClient = getQueryClient();
   const session = await auth.api.getSession({ headers: await headers() });
+
   if (session) {
     void queryClient.prefetchInfiniteQuery(
       trpc.project.getUserProjects.infiniteQueryOptions(
@@ -28,7 +30,7 @@ const page = async () => {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ErrorBoundary fallback={<div>Error</div>}>
+      <ErrorBoundary fallback={<ErrorState title="Something went wrong" description="Please try again later" />}>
         <Suspense fallback={<Loader />}>
           <HomePageView isLoggedIn={!!session} />
         </Suspense>

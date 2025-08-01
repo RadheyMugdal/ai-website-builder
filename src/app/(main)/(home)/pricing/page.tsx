@@ -1,3 +1,4 @@
+import ErrorState from '@/components/global/error-state'
 import Loader from '@/components/global/loader'
 import { auth } from '@/lib/auth'
 import PricingView from '@/modules/pricing/ui/views/pricing-view'
@@ -23,7 +24,7 @@ const PricingPage = async () => {
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
             <Suspense fallback={<Loader />}>
-                <ErrorBoundary fallback={<div>Error</div>}>
+                <ErrorBoundary fallback={<ErrorState title="Failed to load pricing" description="Please try again later" />}>
                     <PricingView />
                 </ErrorBoundary>
             </Suspense>
