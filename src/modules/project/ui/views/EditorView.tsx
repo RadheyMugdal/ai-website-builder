@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { ProjectData } from "../../schema";
 import ComponentFileViewer from "@/components/global/file-viewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code, Crown, Eye, MonitorSmartphone, RotateCw, SquareArrowOutUpRight } from "lucide-react";
+import { Code, Crown, Download, Eye, MonitorSmartphone, RotateCw, SquareArrowOutUpRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { previewDevices } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import UserButton from "@/components/global/user-button";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { useRouter } from "next/navigation";
+import { exportCode } from "@/lib/export-code";
 
 const EditorView = ({ projectData }: { projectData: ProjectData }) => {
   const [url, setUrl] = React.useState("");
@@ -46,9 +47,7 @@ const EditorView = ({ projectData }: { projectData: ProjectData }) => {
       iframe.current.src = iframeUrl.toString();
     }
   };
-  const { data: subscriptionData } = useSuspenseQuery(
-    trpc.pricing.getCurrentSubscription.queryOptions()
-  )
+
 
   return (
     <Tabs className=" w-full h-full gap-0" defaultValue="code">
@@ -62,14 +61,12 @@ const EditorView = ({ projectData }: { projectData: ProjectData }) => {
           </TabsTrigger>
         </TabsList>
         <div className="flex items-center gap-2">
-          {
-            !subscriptionData && (
-              <Button size={"sm"} onClick={() => router.push("/pricing")}>
-                <Crown />
-                Upgrade
-              </Button>
-            )
-          }
+          <Button variant={"outline"} onClick={async () => {
+            exportCode(projectData.files as any)
+          }}>
+            <Download />
+            Export code
+          </Button>
           <UserButton />
         </div>
       </div>

@@ -24,6 +24,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Crown,
   Square,
   Waves,
 } from "lucide-react";
@@ -74,6 +75,9 @@ const ChatView = ({
     setInput("");
     setIsLoading(false);
   };
+  const { data: subscriptionData } = useSuspenseQuery(
+    trpc.pricing.getCurrentSubscription.queryOptions()
+  )
   useEffect(() => {
     setMessages(messageData);
   }, [messageData]);
@@ -87,7 +91,7 @@ const ChatView = ({
       {" "}
       {/* ensures full height */}
       {/* Header */}
-      <header className="bg-background py-3 px-4 border-b shrink-0">
+      <header className="bg-background py-3 px-4 flex justify-between items-center border-b shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-1" asChild>
             <Button variant="outline" size="sm">
@@ -118,6 +122,14 @@ const ChatView = ({
             </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
+        {
+          !subscriptionData && (
+            <Button size={"sm"} onClick={() => router.push("/pricing")}>
+              <Crown />
+              Upgrade
+            </Button>
+          )
+        }
       </header>
       {/* Chat area */}
       <div className="flex flex-col flex-1 overflow-hidden px-4 py-2 relative">

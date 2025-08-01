@@ -1,13 +1,14 @@
 import { db } from "@/db";
 import { message, project } from "@/db/schema";
 import { inngest } from "@/inngest/client";
+import { polarClient } from "@/lib/polar";
 import { templateFiles } from "@/lib/template";
-import { getUsageStatusByUserId } from "@/lib/usage";
+import { getUsageStatusByUserId, plan } from "@/lib/usage";
 import { DEFAULT_PAGE_SIZE } from "@/modules/chat/constants";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { Daytona } from "@daytonaio/sdk";
+import { Daytona, Sandbox } from "@daytonaio/sdk";
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, lt, or } from "drizzle-orm";
+import { and, count, desc, eq, like, lt, or, sql } from "drizzle-orm";
 import z from "zod";
 
 export const projectRouter = createTRPCRouter({
@@ -148,7 +149,7 @@ export const projectRouter = createTRPCRouter({
     }),
   deleteById: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const projectToDelete = await db
         .select()
         .from(project)
