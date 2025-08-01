@@ -15,11 +15,6 @@ const PricingPage = async () => {
     void queryClient.prefetchQuery(
         trpc.pricing.getProducts.queryOptions()
     )
-    if (data?.session) {
-        void queryClient.prefetchQuery(
-            trpc.pricing.getCurrentSubscription.queryOptions()
-        )
-    }
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
             <Suspense fallback={<Loader />}>

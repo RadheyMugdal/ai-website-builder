@@ -1,15 +1,19 @@
 "use client";
 import { useTRPC } from '@/trpc/client'
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import PricingCard from '../components/pricing-card'
+import { authClient } from '@/lib/auth-client';
 
 const PricingView = () => {
     const trpc = useTRPC()
+    const { data } = authClient.useSession()
     const { data: products } = useSuspenseQuery(
         trpc.pricing.getProducts.queryOptions()
     )
-    const { data: currentSubscription } = useSuspenseQuery(
-        trpc.pricing.getCurrentSubscription.queryOptions()
+    const { data: currentSubscription } = useQuery(
+        trpc.pricing.getCurrentSubscription.queryOptions(undefined, {
+            enabled: !!data?.session
+        })
     )
     return (
         <main className='w-full flex   flex-col py-16 gap-8  '>
@@ -24,6 +28,7 @@ const PricingView = () => {
                     name="Free"
                     highlighted={false}
                     description="For individuals who want to try out the platform"
+                    isLoggedIn={!!data?.session}
                     benefits={[
                         {
                             id: "1",
@@ -40,7 +45,7 @@ const PricingView = () => {
                     ]}
                     price="Free"
                     recurringInterval=""
-                    isCurrentSubscription={false}
+                    isCurrentSubscription={!currentSubscription && !!data?.session}
                 />
                 {
                     products.map((product) => {
@@ -61,6 +66,7 @@ const PricingView = () => {
                                 price={priceAmount}
                                 recurringInterval={recurringInterval}
                                 isCurrentSubscription={isCurrentSubscription}
+                                isLoggedIn={!!data?.session}
                             />
                         )
                     })

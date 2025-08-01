@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import Logo from "@/components/global/logo";
 import UserButton from "@/components/global/user-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import clsx from "clsx";
 
 interface Props {
   isLoggedIn: boolean;
@@ -16,12 +17,12 @@ interface Props {
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/about", label: "About Us" },
 ];
 
 const Header = ({ isLoggedIn }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname()
 
   const handleLinkClick = (href: string) => {
     setIsOpen(false);
@@ -32,7 +33,7 @@ const Header = ({ isLoggedIn }: Props) => {
     <header className="px-6 py-4  bg-background">
       <div className="flex items-center justify-between">
         {/* Left: Logo & Desktop Nav */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center  gap-8">
           <Logo />
           <nav className="hidden md:block">
             <ul className="flex gap-6 text-sm font-medium">
@@ -40,7 +41,14 @@ const Header = ({ isLoggedIn }: Props) => {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="hover:underline hover:text-accent transition-colors"
+                    className={
+                      clsx(
+                        "hover:underline hover:text-primary transition-colors",
+                        pathname === href && "text-primary "
+
+                      )
+                    }
+
                   >
                     {label}
                   </Link>
@@ -82,37 +90,39 @@ const Header = ({ isLoggedIn }: Props) => {
       </div>
 
       {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden mt-4 border-t pt-4">
-          <ul className="flex flex-col gap-4 text-sm font-medium">
-            {navLinks.map(({ href, label }) => (
-              <li key={href}>
-                <button
-                  onClick={() => handleLinkClick(href)}
-                  className="w-full text-left px-2 py-1 hover:underline hover:text-accent"
+      {
+        isOpen && (
+          <div className="md:hidden mt-4 border-t pt-4">
+            <ul className="flex flex-col gap-4 text-sm font-medium">
+              {navLinks.map(({ href, label }) => (
+                <li key={href}>
+                  <button
+                    onClick={() => handleLinkClick(href)}
+                    className="w-full text-left px-2 py-1 hover:underline hover:text-accent"
+                  >
+                    {label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {!isLoggedIn && (
+              <div className="mt-6 flex flex-col gap-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleLinkClick("/sign-in")}
                 >
-                  {label}
-                </button>
-              </li>
-            ))}
-          </ul>
-          {!isLoggedIn && (
-            <div className="mt-6 flex flex-col gap-3">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => handleLinkClick("/sign-in")}
-              >
-                Login
-              </Button>
-              <Button size="sm" onClick={() => handleLinkClick("/sign-in")}>
-                Get Started
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-    </header>
+                  Login
+                </Button>
+                <Button size="sm" onClick={() => handleLinkClick("/sign-in")}>
+                  Get Started
+                </Button>
+              </div>
+            )}
+          </div>
+        )
+      }
+    </header >
   );
 };
 
