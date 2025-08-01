@@ -2,12 +2,9 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import * as schema from "@/db/schema";
 import { db } from "@/db/index";
-import { checkout, polar, portal, usage, webhooks } from "@polar-sh/better-auth"
+import { checkout, polar, portal, webhooks } from "@polar-sh/better-auth";
 import { polarClient } from "./polar";
-import { dataTagErrorSymbol } from "@tanstack/react-query";
 import { DURATION, getUsageTracker, plan } from "./usage";
-import { PgEnum } from "drizzle-orm/pg-core";
-import { SubscriptionStatus } from "@polar-sh/sdk/models/components/subscriptionstatus.js";
 import { eq } from "drizzle-orm";
 import { subscription } from "../db/schema";
 

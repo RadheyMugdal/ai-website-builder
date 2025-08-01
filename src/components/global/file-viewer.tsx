@@ -13,15 +13,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import {
-  Check,
-  Copy,
-  ExternalLink,
-  FileCode,
-  FileIcon,
-  FolderIcon,
-  FolderOpenIcon,
-} from "lucide-react";
+import { Check, Copy, FileCode, FileIcon, FolderIcon, FolderOpenIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import {
   createContext,
@@ -509,11 +501,11 @@ export default function ComponentFileViewer({
             i === parts.length - 1
               ? { ...file, id: file.path, name: part, isSelectable: true }
               : {
-                  id: parts.slice(0, i + 1).join("/"),
-                  name: part,
-                  children: {},
-                  isSelectable: false,
-                };
+                id: parts.slice(0, i + 1).join("/"),
+                name: part,
+                children: {},
+                isSelectable: false,
+              };
         }
         current = current[part].children || current[part];
       }

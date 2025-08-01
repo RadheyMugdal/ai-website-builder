@@ -1,6 +1,6 @@
 import Loader from "@/components/global/loader";
 import { auth } from "@/lib/auth";
-import ProjectView from "@/modules/project/views/ProjectView";
+import ProjectView from "@/modules/project/ui/views/ProjectView";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { headers } from "next/headers";

@@ -1,8 +1,7 @@
 import { db } from "@/db";
 import { message, project } from "@/db/schema";
 import { inngest } from "@/inngest/client";
-import { polarClient } from "@/lib/polar";
-import { getUsageStatusByUserId, plan } from "@/lib/usage";
+import { getUsageStatusByUserId } from "@/lib/usage";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";

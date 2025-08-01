@@ -1,8 +1,6 @@
 
 import { rateLimiterFlexibleSchema } from "@/db/schema";
 import { RateLimiterDrizzle } from 'rate-limiter-flexible'
-import { auth } from "./auth";
-import { headers } from "next/headers";
 import { drizzle } from "drizzle-orm/neon-serverless";
 
 export const db = drizzle(process.env.DATABASE_URL!);

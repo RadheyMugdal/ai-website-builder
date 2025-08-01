@@ -58,7 +58,7 @@ const DeleteDialog = ({
                       })),
                     };
                   }
-                );  
+                );
 
                 toast.success("Project deleted successfully");
                 setIsOpen(false);

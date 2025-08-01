@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { MessageCard, AssistantMessageCard } from "../components/MessageCard";
-import { Messages, ProjectData } from "../schema";
+import { Messages, ProjectData } from "../../schema";
 import LoadingState from "../components/LoadingState";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";

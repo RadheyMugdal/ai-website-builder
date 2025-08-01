@@ -1,8 +1,6 @@
-import { auth } from "@/lib/auth";
 import { polarClient } from "@/lib/polar";
-import { getUsageStatusByUserId, getUsageTracker, plan } from "@/lib/usage";
+import { getUsageStatusByUserId } from "@/lib/usage";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { headers } from "next/headers";
 
 export const pricingRouter = createTRPCRouter({
     getProducts: baseProcedure.query(async ({ }) => {

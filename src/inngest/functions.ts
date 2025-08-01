@@ -1,6 +1,6 @@
 import { lastAssistantTextMessage, updateOrCreateFile } from "@/lib/utils";
 import { inngest } from "./client";
-import { Daytona, Sandbox } from "@daytonaio/sdk";
+import { Daytona } from "@daytonaio/sdk";
 import { createAgent, createNetwork, createTool } from "@inngest/agent-kit";
 import z from "zod";
 

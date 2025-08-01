@@ -1,4 +1,4 @@
-"use client";
+"use client";;
 import {
   Card,
   CardDescription,
@@ -11,22 +11,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import DeleteDialog from "@/modules/project/components/DeleteDialog";
+import DeleteDialog from "@/modules/project/ui/components/DeleteDialog";
 import { useTRPC } from "@/trpc/client";
-import {
-  useInfiniteQuery,
-  useQuery,
-  useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Ellipsis, SquareArrowOutUpRight, Trash2, Waves } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { useProjectsFilter } from "../hooks/use-projects-filter";
-import { DEFAULT_PAGE_SIZE } from "../constants";
+
+import { DEFAULT_PAGE_SIZE } from "../../constants";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import Loader from "@/components/global/loader";
 import { Spinner } from "@/components/global/spinner";
 
 const ProjectsView = () => {
