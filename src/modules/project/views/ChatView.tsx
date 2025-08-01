@@ -32,9 +32,10 @@ import { MessageCard, AssistantMessageCard } from "../components/MessageCard";
 import { Messages, ProjectData } from "../schema";
 import LoadingState from "../components/LoadingState";
 import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { formatMsAsFutureDate } from "@/lib/utils";
 
 const ChatView = ({
   projectData,
@@ -45,22 +46,31 @@ const ChatView = ({
 }) => {
   const trpc = useTRPC();
   const router = useRouter();
+  const queryClient = useQueryClient()
   const [messages, setMessages] = useState<Messages>(messageData);
-  const createMessage = useMutation(trpc.message.create.mutationOptions());
+  const createMessage = useMutation(trpc.message.create.mutationOptions({
+  }));
   const [isLoading, setIsLoading] = useState(false);
   const [input, setInput] = useState("");
+  const { data: usageData } = useSuspenseQuery(
+    trpc.pricing.getCredits.queryOptions(undefined, { refetchInterval: 2000 })
+
+  )
   const handleSubmit = async () => {
     setIsLoading(true);
-    const newUserMessage = await createMessage.mutateAsync({
-      message: input,
-      projectId: projectData.id,
-    });
-    if (createMessage.isError) {
-      toast.error(createMessage.error.message);
-      setIsLoading(false);
-      return;
+    try {
+      const newUserMessage = await createMessage.mutateAsync({
+        message: input,
+        projectId: projectData.id,
+      });
+      setMessages([...messages, newUserMessage]);
+    } catch (error) {
+      if (createMessage.isError) {
+        toast.error(createMessage.error.message);
+        setIsLoading(false);
+        return;
+      }
     }
-    setMessages([...messages, newUserMessage]);
     setInput("");
     setIsLoading(false);
   };
@@ -110,9 +120,18 @@ const ChatView = ({
         </DropdownMenu>
       </header>
       {/* Chat area */}
-      <div className="flex flex-col flex-1 overflow-hidden px-4 py-2">
+      <div className="flex flex-col flex-1 overflow-hidden px-4 py-2 relative">
+        <div className="absolute  flex justify-between items-center top-0 left-0 right-0   border-b bg-background py-2 px-4">
+          <div className="flex items-center justify-between w-full">
+            <p className="text-xs font-semibold">{usageData?.remainingPoints} Credits remaining</p>
+            <span className="text-xs opacity-75">Resets at {formatMsAsFutureDate(usageData?.msBeforeNext!)}</span>
+          </div>
+          {/* <Button size={"sm"}>
+            Upgrade
+          </Button> */}
+        </div>
         {/* Scrollable messages */}
-        <div className="flex-1 overflow-y-auto flex flex-col gap-4 pr-2">
+        <div className="flex-1 mt-8 overflow-y-auto flex flex-col gap-4 pr-2">
           {messages.map((message, index) => {
             if (message.role === "assistant") {
               return <AssistantMessageCard key={index} message={message} />;
@@ -126,13 +145,16 @@ const ChatView = ({
         </div>
 
         {/* Input */}
-        <div className="pt-4 shrink-0">
+        <div className="pt-4 shrink-0 ">
+
           <PromptInput
             value={input}
             onValueChange={setInput}
             isLoading={isLoading}
             onSubmit={handleSubmit}
+            className="relative"
           >
+
             <PromptInputTextarea placeholder="Ask me anything..." />
             <PromptInputActions className="justify-end pt-2">
               <PromptInputAction
