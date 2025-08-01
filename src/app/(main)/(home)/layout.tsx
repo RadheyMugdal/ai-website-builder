@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
-import LoginDialog from "@/modules/auth/components/ui/login-dialog";
-import Header from "@/modules/chat/components/ui/header";
+import LoginDialog from "@/modules/auth/ui/components/login-dialog";
+import Header from "@/modules/chat/ui/components/header";
 import { headers } from "next/headers";
 import React from "react";
 

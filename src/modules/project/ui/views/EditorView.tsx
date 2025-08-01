@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { ProjectData } from "../schema";
+import { ProjectData } from "../../schema";
 import ComponentFileViewer from "@/components/global/file-viewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code, Crown, Download, Eye, MonitorSmartphone, RotateCw, SquareArrowOutUpRight } from "lucide-react";
+import { Code, Crown, Eye, MonitorSmartphone, RotateCw, SquareArrowOutUpRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { previewDevices } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

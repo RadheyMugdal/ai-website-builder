@@ -15,7 +15,7 @@ import { LuWaves } from "react-icons/lu";
 import { authClient } from "@/lib/auth-client";
 
 const LoginDialog = () => {
-  const { isOpen, close, setOpen } = useLoginDialogStore();
+  const { isOpen, setOpen } = useLoginDialogStore();
   const handleSocialLogin = async (provider: "google" | "github") => {
     await authClient.signIn.social({
       provider,

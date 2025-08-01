@@ -1,4 +1,3 @@
-import { uuid } from "drizzle-orm/gel-core";
 import {
   pgTable,
   text,

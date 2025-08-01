@@ -1,12 +1,6 @@
-"use client"
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { authClient } from '@/lib/auth-client'
-import { cn } from '@/lib/utils'
+"use client";
 import { useTRPC } from '@/trpc/client'
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
-import { Check, CheckCircle2, Flame } from 'lucide-react'
-import React from 'react'
+import { useSuspenseQuery } from '@tanstack/react-query';
 import PricingCard from '../components/pricing-card'
 
 const PricingView = () => {

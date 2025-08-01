@@ -1,7 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, Waves } from "lucide-react";
-import React from "react";
-import { Message, ProjectData } from "../schema";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Message } from "../../schema";
 import { format } from "date-fns";
 
 const MessageCard = ({ message }: { message: Message }) => {

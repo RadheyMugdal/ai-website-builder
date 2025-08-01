@@ -1,24 +1,17 @@
-"use client";
-import Logo from "@/components/global/logo";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+"use client";;
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { useTRPC } from "@/trpc/client";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import React from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import ChatView from "./ChatView";
 import EditorView from "./EditorView";
 interface props {
   projectId: string;
 }
 const ProjectView = ({ projectId }: props) => {
-  const queryClient = useQueryClient();
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
     trpc.project.getById.queryOptions(
