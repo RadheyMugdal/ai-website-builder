@@ -2,14 +2,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Avatar, AvatarImage } from "../ui/avatar";
-import { AvatarFallback } from "@radix-ui/react-avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { authClient } from "@/lib/auth-client";
-import { DollarSign, Gem, LogOut } from "lucide-react";
+import { Gem, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const UserButton = () => {
@@ -27,14 +25,11 @@ const UserButton = () => {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className=" min-w-[230px]">
-        {/* <DropdownMenuLabel>Profile</DropdownMenuLabel> */}
-        {/* <DropdownMenuSeparator /> */}
-
         <div className=" py-2">
           <div className=" flex gap-2 items-center">
             <Avatar>
               <AvatarImage src={session?.data.user.image!} />
-              <AvatarFallback className="bg-secondary">
+              <AvatarFallback>
                 {session.data.user.name.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
