@@ -25,7 +25,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Crown,
+  MonitorSmartphone,
+  Moon,
   Square,
+  Sun,
   Waves,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -37,6 +40,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { formatMsAsFutureDate } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 const ChatView = ({
   projectData,
@@ -46,6 +50,7 @@ const ChatView = ({
   messageData: Messages;
 }) => {
   const trpc = useTRPC();
+  const { setTheme } = useTheme()
   const router = useRouter();
   const queryClient = useQueryClient()
   const [messages, setMessages] = useState<Messages>(messageData);
@@ -114,9 +119,13 @@ const ChatView = ({
               <DropdownMenuSubTrigger>Change Theme</DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
-                  <DropdownMenuItem>Light</DropdownMenuItem>
-                  <DropdownMenuItem>Dark</DropdownMenuItem>
-                  <DropdownMenuItem>System</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("light")}>
+                    <Sun />Light</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    <Moon />
+                    Dark</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("system")}>
+                    <MonitorSmartphone />System</DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
@@ -138,9 +147,6 @@ const ChatView = ({
             <p className="text-xs font-semibold">{usageData?.remainingPoints} Credits remaining</p>
             <span className="text-xs opacity-75">Resets at {formatMsAsFutureDate(usageData?.msBeforeNext!)}</span>
           </div>
-          {/* <Button size={"sm"}>
-            Upgrade
-          </Button> */}
         </div>
         {/* Scrollable messages */}
         <div className="flex-1 mt-8 overflow-y-auto flex flex-col gap-4 pr-2">
