@@ -7,7 +7,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { authClient } from "@/lib/auth-client";
-import { Gem, LogOut } from "lucide-react";
+import { Gem, LogOut, Sparkles, Wallet } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const UserButton = () => {
@@ -34,18 +34,24 @@ const UserButton = () => {
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-center text-sm ">
-              <p className="font-semibold truncate">{session.data.user.name}</p>
-              <p className="truncate opacity-75"> {session.data.user.email}</p>
+              <p className="font-semibold truncate text-sm">{session.data.user.name}</p>
+              <p className="truncate opacity-75 text-xs"> {session.data.user.email}</p>
             </div>
           </div>
         </div>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => {
+          router.push("/pricing")
+        }}>
+          <Sparkles />
+          Upgrade to Pro
+        </DropdownMenuItem>
 
         <DropdownMenuItem onClick={async () => {
           await authClient.customer.portal()
         }}>
-          <Gem />
-          <p>Manage subscription</p>
+          <Wallet />
+          Biling
         </DropdownMenuItem>
         <DropdownMenuSeparator />
 

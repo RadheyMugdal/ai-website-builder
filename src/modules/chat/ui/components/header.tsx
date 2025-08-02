@@ -9,6 +9,7 @@ import UserButton from "@/components/global/user-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import clsx from "clsx";
+import { ModeToggle } from "@/components/global/mode-toggle";
 
 interface Props {
   isLoggedIn: boolean;
@@ -60,6 +61,7 @@ const Header = ({ isLoggedIn }: Props) => {
 
         {/* Right: Auth or User */}
         <div className="hidden md:flex items-center gap-3">
+          <ModeToggle />
           {isLoggedIn ? (
             <UserButton />
           ) : (
