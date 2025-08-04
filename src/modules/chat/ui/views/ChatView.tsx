@@ -12,7 +12,7 @@ import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { ArrowUp, Square } from "lucide-react";
+import { ArrowUp, Loader, Loader2, Square } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -58,15 +58,15 @@ const ChatView = () => {
         <PromptInputTextarea placeholder="Ask me anything..." />
         <PromptInputActions className="justify-end pt-2">
           <PromptInputAction
-            tooltip={isLoading ? "Stop generation" : "Send message"}
+            tooltip={isLoading ? "Generating project..." : "Send message"}
           >
             <Button
-              variant="default"
+              onClick={handleSubmit}
               size="icon"
               className="h-8 w-8 rounded-full"
             >
               {isLoading ? (
-                <Square className="size-5 fill-current" />
+                <Loader2 className="size-5 animate-spin " />
               ) : (
                 <ArrowUp className="size-5  " />
               )}
