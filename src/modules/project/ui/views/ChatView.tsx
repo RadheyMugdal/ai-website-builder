@@ -25,6 +25,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Crown,
+  Loader2,
   MonitorSmartphone,
   Moon,
   Square,
@@ -179,14 +180,14 @@ const ChatView = ({
                 tooltip={isLoading ? "Stop generation" : "Send message"}
               >
                 <Button
-                  variant="default"
+                  onClick={handleSubmit}
                   size="icon"
                   className="h-8 w-8 rounded-full"
                 >
                   {isLoading ? (
-                    <Square className="size-5 fill-current" />
+                    <Loader2 className="size-5 animate-spin " />
                   ) : (
-                    <ArrowUp className="size-5" />
+                    <ArrowUp className="size-5  " />
                   )}
                 </Button>
               </PromptInputAction>
