@@ -3,7 +3,7 @@ import { inngest } from "./client";
 import { Daytona } from "@daytonaio/sdk";
 import { createAgent, createNetwork, createTool } from "@inngest/agent-kit";
 import z from "zod";
-
+import { generateText } from "ai"
 import { PROMPT } from "@/lib/prompt";
 import { models } from "inngest";
 import { db } from "@/db";
@@ -11,6 +11,13 @@ import { message, project } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { TemplateFile } from "@/lib/template";
 import { consumeUserIdCredit } from "@/lib/usage";
+
+
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 
 export const generateCode = inngest.createFunction(
   { id: "generate-code" },
@@ -38,6 +45,25 @@ export const generateCode = inngest.createFunction(
 
         return sandbox.id;
       });
+      await step.run("generate-project-title", async () => {
+        const prompt = `Generate a concise, 2–5 word title for the following project prompt. Return only the title and nothing else:\n\n"${event.data.prompt}"`;
+
+        const result = await generateText({
+          prompt,
+          model: google("gemini-1.5-flash-latest"),
+        });
+
+        let title = result.text?.trim() || "Untitled Project";
+
+        // Optional: sanitize it
+        title = title.replace(/[^\w\s\-]/g, "").slice(0, 50);
+
+        await db
+          .update(project)
+          .set({ name: title })
+          .where(eq(project.id, event.data.projectId));
+      });
+
     } else {
       sandboxId = await step.run("ensure-sandbox-running", async () => {
         const sandbox = await daytona.get(event.data.sandboxId);

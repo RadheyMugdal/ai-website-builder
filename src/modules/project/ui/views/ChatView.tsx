@@ -102,7 +102,7 @@ const ChatView = ({
           <DropdownMenuTrigger className="flex items-center gap-1" asChild>
             <Button variant="outline" size="sm">
               <Waves className="size-5 text-primary" />
-              <h2 className="text-sm">Next.js Project</h2>
+              <h2 className="text-sm truncate">{projectData.name}</h2>
               <ChevronDown size={15} />
             </Button>
           </DropdownMenuTrigger>
