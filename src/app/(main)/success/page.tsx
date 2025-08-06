@@ -3,7 +3,6 @@ import Loader from "@/components/global/loader";
 import SuccessView from "@/modules/pricing/ui/views/success-view";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { redirect, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
