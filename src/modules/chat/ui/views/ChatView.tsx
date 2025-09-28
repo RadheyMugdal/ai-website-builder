@@ -1,4 +1,4 @@
-"use client";
+"use client";;
 import { Button } from "@/components/ui/button";
 import {
   PromptInput,
@@ -7,26 +7,25 @@ import {
   PromptInputTextarea,
 } from "@/components/ui/prompt-input";
 import { authClient } from "@/lib/auth-client";
-import { useLoginDialogStore } from "@/modules/auth/store/login-dialog-store";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { ArrowUp, Loader, Loader2, Square } from "lucide-react";
+import { ArrowUp, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
 
 const ChatView = () => {
+  const searchParams = useSearchParams()
   const { data } = authClient.useSession();
-  const [input, setInput] = useState("");
-  const { setOpen } = useLoginDialogStore();
+  const [input, setInput] = useState(searchParams.get("input") || "");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const trpc = useTRPC();
   const createProject = useMutation(trpc.project.create.mutationOptions());
   const handleSubmit = async () => {
     if (!data?.user) {
-      setOpen(true);
+      redirect("/sign-in?redirect=/&input=" + encodeURIComponent(input));
       return;
     }
 

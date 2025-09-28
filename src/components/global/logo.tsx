@@ -1,10 +1,9 @@
 import Link from "next/link";
-import React from "react";
 import { LuWaves } from "react-icons/lu";
 
-const Logo = () => {
+const Logo = ({ className }: { className?: string }) => {
   return (
-    <Link href={"/"}>
+    <Link href={"/"} className={className}>
       <div className="flex gap-1 justify-center items-center">
         <span>
           <LuWaves className=" size-6 text-primary" />
