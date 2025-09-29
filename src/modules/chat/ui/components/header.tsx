@@ -35,15 +35,15 @@ const Header = ({ isLoggedIn }: Props) => {
         <div className="flex items-center  gap-8">
           <Logo />
           <nav className="hidden md:block">
-            <ul className="flex gap-6 text-sm font-medium">
+            <ul className="flex gap-6  ">
               {navLinks.map(({ href, label }) => (
                 <li key={href}>
                   <Link
                     href={href}
                     className={
                       clsx(
-                        "hover:underline hover:text-primary transition-colors",
-                        pathname === href && "text-primary "
+                        "hover:underline  opacity-80 transition-colors",
+                        pathname === href && " opacity-100 underline"
 
                       )
                     }

@@ -10,7 +10,7 @@ type Props = {
 const layout = async ({ children }: Props) => {
   const session = await auth.api.getSession({ headers: await headers() });
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen max-w-7xl  mx-auto">
       <Header isLoggedIn={!!session} />
       <main className="flex-1 flex flex-col">{children}</main>
     </div>

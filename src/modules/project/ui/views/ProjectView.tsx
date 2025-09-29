@@ -22,7 +22,7 @@ const ProjectView = ({ projectId }: props) => {
     )
   );
   return (
-    <main className=" w-screen h-screen">
+    <main   >
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel defaultSize={40} minSize={30} className=" h-full">
           <ChatView messageData={data.messages} projectData={data.project} />
