@@ -1,13 +1,11 @@
-"use client";
-
-import React, { useState } from "react";
+"use client";;
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import Logo from "@/components/global/logo";
 import UserButton from "@/components/global/user-button";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import clsx from "clsx";
 import { ModeToggle } from "@/components/global/mode-toggle";
 
@@ -73,7 +71,7 @@ const Header = ({ isLoggedIn }: Props) => {
               >
                 Login
               </Button>
-              <Button size="sm" onClick={() => router.push("/sign-in")}>
+              <Button size="sm" onClick={() => router.push("/sign-up")}>
                 Get Started
               </Button>
             </>
