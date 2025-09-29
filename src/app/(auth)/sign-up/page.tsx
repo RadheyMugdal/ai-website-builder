@@ -66,8 +66,8 @@ const SignUpPage = () => {
         setSocialLoading(false)
     };
     return (
-        <main className=" w-screen h-screen  grid md:grid-cols-2 p-2">
-            <div className="flex flex-col order-2  md:order-1 gap-6 p-4  sm:p-12 lg:p-28 md:justify-center ">
+        <main className=" w-screen  h-screen  grid md:grid-cols-2 p-2 max-w-7xl mx-auto">
+            <div className="flex flex-col order-2  md:order-1 gap-6 p-4  sm:p-12 lg:px-28 md:justify-center ">
                 <div className=" space-y-2">
                     <h2 className=" text-2xl md:text-3xl font-semibold">Create Your Account</h2>
                     <p className="text-sm  opacity-80">Sign up to keep building smarter, faster, and beautifully with Wavely.</p>
