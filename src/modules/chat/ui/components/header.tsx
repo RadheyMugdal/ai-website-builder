@@ -3,11 +3,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import Logo from "@/components/global/logo";
 import UserButton from "@/components/global/user-button";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { ModeToggle } from "@/components/global/mode-toggle";
+import Logo from "@/components/global/logo";
 
 interface Props {
   isLoggedIn: boolean;
@@ -34,6 +34,7 @@ const Header = ({ isLoggedIn }: Props) => {
         {/* Left: Logo & Desktop Nav */}
         <div className="flex items-center  gap-8">
           <Logo />
+
           <nav className="hidden md:block">
             <ul className="flex gap-6  ">
               {navLinks.map(({ href, label }) => (

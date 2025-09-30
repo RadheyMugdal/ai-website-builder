@@ -1,15 +1,19 @@
+import { useTheme } from "next-themes";
+import Image from "next/image";
 import Link from "next/link";
-import { LuWaves } from "react-icons/lu";
 
-const Logo = ({ className }: { className?: string }) => {
+const Logo = ({ className, width, height }: { className?: string, width?: number, height?: number }) => {
+  const { theme, systemTheme } = useTheme()
+  const currentTheme = theme === "system" ? systemTheme : theme;
   return (
-    <Link href={"/"} className={className}>
-      <div className="flex gap-1 justify-center items-center">
-        <span>
-          <LuWaves className=" size-8 text-primary" />
-        </span>
-        <h1 className=" font-bold  text-2xl">Wavely</h1>
-      </div>
+    <Link href={"/"} >
+      <Image
+        src={currentTheme === "dark" ? "/wavely-logo-dark-mode.png" : "/wavely-logo.png"}
+        alt="wavely logo"
+        width={width || 120}
+        height={height || 120}
+        className={className}
+      />
     </Link>
   );
 };

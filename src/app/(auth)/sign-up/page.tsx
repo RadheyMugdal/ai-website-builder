@@ -13,12 +13,12 @@ import {
 } from "@hookform/resolvers/zod";
 import z from "zod";
 import Link from "next/link";
-import { LuWaves } from "react-icons/lu";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
+import Image from "next/image";
 
 const formSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -154,10 +154,15 @@ const SignUpPage = () => {
             </div>
             <div className="bg-primary order-1 md:order-2  h-[15vh] md:h-full  text-primary-foreground rounded-2xl md:flex flex-col justify-between  text-center   relative overflow-hidden">
                 {/* Logo */}
-                <div className="flex gap-2 items-center  m-4">
-                    <LuWaves className=" size-6 md:size-8 " />
-                    <h2 className=" font-bold text-xl md:text-2xl">Wavely</h2>
-                </div>
+                <Link href={"/"} >
+                    <Image
+                        src={'/wavely-logo-auth-page.png'}
+                        alt="Wavely logo"
+                        width={120}
+                        height={120}
+                        className="m-4"
+                    />
+                </Link>
 
                 <div className="  m-8  hidden  relative z-10 gap-2 md:flex flex-col items-start">
                     <h1 className=" text-xl md:text-4xl lg:text-5xl  font-semibold">Build smarter</h1>
