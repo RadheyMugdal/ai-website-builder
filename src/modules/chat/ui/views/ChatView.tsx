@@ -54,7 +54,7 @@ const ChatView = () => {
         onSubmit={handleSubmit}
         className=" w-full"
       >
-        <PromptInputTextarea placeholder="Ask me anything..." />
+        <PromptInputTextarea placeholder="Describe your website idea — I&apos;ll build it for you." />
         <PromptInputActions className="justify-end pt-2">
           <PromptInputAction
             tooltip={isLoading ? "Generating project..." : "Send message"}

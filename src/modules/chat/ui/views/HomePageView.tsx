@@ -1,5 +1,6 @@
-import React from "react";
+import { Suspense } from "react";
 import ChatView from "./ChatView";
+import ProjectsViewSkeleton from "../components/ProjectViewSkeleton";
 import ProjectsView from "./ProjectsView";
 
 interface props {
@@ -20,7 +21,11 @@ const HomePageView = ({ isLoggedIn }: props) => {
         </div>
         <ChatView />
       </div>
-      {isLoggedIn && <ProjectsView />}
+      {isLoggedIn &&
+        <Suspense fallback={<ProjectsViewSkeleton />}>
+          <ProjectsView />
+        </Suspense>
+      }
     </div>
   );
 };
