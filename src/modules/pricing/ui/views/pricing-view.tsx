@@ -1,7 +1,7 @@
 "use client";
-import { useTRPC } from '@/trpc/client'
+import { useTRPC } from '@/trpc/client';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import PricingCard from '../components/pricing-card'
+import PricingCard from '../components/pricing-card';
 import { authClient } from '@/lib/auth-client';
 
 const PricingView = () => {
@@ -16,13 +16,13 @@ const PricingView = () => {
         })
     )
     return (
-        <main className='w-full flex   flex-col py-16 gap-8  '>
+        <main className='w-full flex  py-8  md:py-4 flex-col gap-8  '>
 
-            <div className='flex flex-col gap-3 items-center justify-center'>
-                <h1 className='text-5xl font-bold'>Plans and Pricing</h1>
-                <p className=' opacity-75'>Upgrade your plan and increase your monthly credits.</p>
+            <div className='flex flex-col gap-2 items-center justify-center'>
+                <h1 className=' text-3xl md:text-5xl font-bold'>Pricing</h1>
+                <p className=' text-sm md:text-base text-center text-balance  opacity-75'>Upgrade your plan and increase your monthly credits.</p>
             </div>
-            <div className=' grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))]  mx-auto  max-w-6xl  items-center   gap-6 py-8 px-12 w-full '>
+            <div className=' grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))]  mx-auto  max-w-6xl  items-center   gap-6 py-8  px-4 md:px-12 w-full '>
                 <PricingCard
                     id="free"
                     name="Free"
@@ -43,7 +43,7 @@ const PricingView = () => {
                             description: "Export project",
                         },
                     ]}
-                    price="Free"
+                    price="$0"
                     recurringInterval=""
                     isCurrentSubscription={!currentSubscription && !!data?.session}
                 />
