@@ -3,17 +3,17 @@ import { inngest } from "./client";
 import { Daytona } from "@daytonaio/sdk";
 import { createAgent, createNetwork, createTool } from "@inngest/agent-kit";
 import z from "zod";
-import { generateText } from "ai"
+import { generateText } from "ai";
 import { PROMPT } from "@/lib/prompt";
 import { models } from "inngest";
 import { db } from "@/db";
 import { message, project } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { TemplateFile } from "@/lib/template";
-import { consumeUserIdCredit } from "@/lib/usage";
 
 
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { polarClient } from "@/lib/polar";
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -37,7 +37,7 @@ export const generateCode = inngest.createFunction(
     if (!event.data.sandboxId) {
       sandboxId = await step.run("create-sandbox", async () => {
         const sandbox = await daytona.create({
-          snapshot: "test",
+          snapshot: "nextjs-app",
           autoStopInterval: 10,
           autoArchiveInterval: 10,
           public: true,
@@ -50,7 +50,7 @@ export const generateCode = inngest.createFunction(
 
         const result = await generateText({
           prompt,
-          model: google("gemini-1.5-flash-latest"),
+          model: google("gemini-2.0-flash"),
         });
 
         let title = result.text?.trim() || "Untitled Project";
@@ -248,20 +248,28 @@ export const generateCode = inngest.createFunction(
         files = updateOrCreateFile(file, files);
       });
 
-      const updatedProject = await db
+      const [updatedProject] = await db
         .update(project)
         .set({
           previewUrl: url.legacyProxyUrl,
           status: "running",
           files,
         })
-        .where(eq(project.id, event.data.projectId));
+        .where(eq(project.id, event.data.projectId)).returning()
       const updatedMessage = await db.insert(message).values({
         content: result.state.data.summary,
         role: "assistant",
         projectId: event.data.projectId,
       });
-      await consumeUserIdCredit(existingProject.userId, event.data.plan)
+      await polarClient.events.ingest({
+        events: [
+          {
+            name: "wavely_ai_usage",
+            externalCustomerId: updatedProject.userId,
+          }
+        ]
+
+      })
     });
   }
 );
