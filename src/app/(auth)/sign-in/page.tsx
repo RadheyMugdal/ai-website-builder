@@ -31,16 +31,9 @@ const SignInPage = () => {
     setSocialLoading(true)
     await authClient.signIn.social({
       provider,
+      callbackURL: `${searchParams.get('redirect') || '/'}?input=${encodeURIComponent(searchParams.get('input') || '')}`
     },
-      {
-        onSuccess: () => {
-          if (searchParams.get("redirect")) {
-            redirect(`${searchParams.get("redirect")!}?input=` + encodeURIComponent(searchParams.get("input") || ""))
-          } else {
-            redirect(`/?input=` + encodeURIComponent(searchParams.get("input") || ""))
-          }
-        }
-      }
+
     );
     setSocialLoading(false)
   };
