@@ -36,7 +36,7 @@ export const projectRouter = createTRPCRouter({
               lt(project.id, input.cursor.id)
             )
           )
-        )
+        );
       }
       const projects = await db
         .select()
@@ -49,19 +49,22 @@ export const projectRouter = createTRPCRouter({
         const lastProject = projects.pop();
         nextCursor = {
           id: lastProject!.id,
-          createdAt: lastProject!.createdAt,
+          createdAt: lastProject!.createdAt.toISOString(),
         };
       }
 
       return {
         projects,
-        nextCursor,
+        nextCursor: nextCursor ?? null,
       };
     }),
   create: protectedProcedure
     .input(z.object({ prompt: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const usage = await getUsageStatusByUserId(ctx.auth.user.id, ctx.subscriptionStatus as any)
+      const usage = await getUsageStatusByUserId(
+        ctx.auth.user.id,
+        ctx.subscriptionStatus as any
+      );
       if (usage?.remainingPoints === 0) {
         throw new TRPCError({
           code: "BAD_REQUEST",

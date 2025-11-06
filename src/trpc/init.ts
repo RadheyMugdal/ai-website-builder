@@ -34,15 +34,30 @@ export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!session) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
   }
-  const [userSubscription] = await db.select({
-    status: subscription.status
-  }).from(subscription).where(eq(subscription.userId, session.user.id))
+  let subscriptionStatus: "Free" | "Pro" | "Enterprise" = "Free";
+  try {
+    const [userSubscription] = await db
+      .select({
+        status: subscription.status,
+      })
+      .from(subscription)
+      .where(eq(subscription.userId, session.user.id));
+
+    subscriptionStatus = (userSubscription?.status ?? "Free") as
+      | "Free"
+      | "Pro"
+      | "Enterprise";
+  } catch (error) {
+    // If subscription query fails, default to "Free"
+    console.error("Failed to fetch user subscription:", error);
+    subscriptionStatus = "Free";
+  }
 
   return next({
     ctx: {
       ...ctx,
       auth: session,
-      subscriptionStatus: userSubscription.status
+      subscriptionStatus,
     },
   });
 });
