@@ -145,8 +145,8 @@ const ChatView = ({
       <div className="flex flex-col flex-1 overflow-hidden px-4 py-2 relative">
         <div className="absolute  flex justify-between items-center top-0 left-0 right-0   border-b bg-background py-2 px-4">
           <div className="flex items-center justify-between w-full">
-            <p className="text-xs font-semibold">{usageData?.remainingPoints} Credits remaining</p>
-            <span className="text-xs opacity-75">Resets at {formatMsAsFutureDate(usageData?.msBeforeNext!)}</span>
+            <p className="text-xs font-semibold">{usageData?.credits} Credits remaining</p>
+            {/* <span className="text-xs opacity-75">Resets at {formatMsAsFutureDate(usageData.!)}</span> */}
           </div>
         </div>
         {/* Scrollable messages */}

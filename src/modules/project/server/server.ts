@@ -3,7 +3,7 @@ import { message, project } from "@/db/schema";
 import { inngest } from "@/inngest/client";
 import { polarClient } from "@/lib/polar";
 import { templateFiles } from "@/lib/template";
-import { getUsageStatusByUserId, plan } from "@/lib/usage";
+import { getUsageStatus } from "@/lib/usage";
 import { DEFAULT_PAGE_SIZE } from "@/modules/chat/constants";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { Daytona, Sandbox } from "@daytonaio/sdk";
@@ -61,11 +61,10 @@ export const projectRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ prompt: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const usage = await getUsageStatusByUserId(
-        ctx.auth.user.id,
-        ctx.subscriptionStatus as any
+      const usage = await getUsageStatus(
+        ctx.auth.user.id
       );
-      if (usage?.remainingPoints === 0) {
+      if (usage?.credits === 0) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Not enough credits",
