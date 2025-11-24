@@ -4,7 +4,7 @@ import * as schema from "@/db/schema";
 import { db } from "@/db/index";
 import { checkout, polar, portal, webhooks } from "@polar-sh/better-auth";
 import { polarClient } from "./polar";
-import { DURATION, getUsageTracker, plan } from "./usage";
+import { CREDITS_PER_PLAN, Plan } from "./usage";
 import { eq } from "drizzle-orm";
 import { subscription } from "../db/schema";
 
@@ -58,25 +58,41 @@ export const auth = betterAuth({
             const subscriptionPlan = payload.data.product.name
             const subscriptionId = payload.data.id
             const userId = payload.data.customer.externalId
+
             await db.update(subscription).set({
               id: subscriptionId,
               status: subscriptionPlan as any
             }).where(
               eq(subscription.userId, userId!)
             )
+
+            // Reset credits for the new plan
+            const credits = CREDITS_PER_PLAN[subscriptionPlan as Plan] || 5;
+            await db.update(schema.user).set({
+              credits: credits,
+              lastResetDate: new Date()
+            }).where(eq(schema.user.id, userId!));
+
             return
           },
           async onSubscriptionUpdated(payload) {
             const subscriptionPlan = payload.data.product.name
             const subscriptionId = payload.data.id
             const userId = payload.data.customer.externalId
+
             await db.update(subscription).set({
               status: subscriptionPlan as any
             }).where(
               eq(subscription.userId, userId!)
             )
-            const usageTracker = await getUsageTracker(subscriptionPlan as plan)
-            await usageTracker.set(payload.data.customer.externalId!, 0, DURATION)
+
+            // Reset credits for the updated plan
+            const credits = CREDITS_PER_PLAN[subscriptionPlan as Plan] || 5;
+            await db.update(schema.user).set({
+              credits: credits,
+              lastResetDate: new Date()
+            }).where(eq(schema.user.id, userId!));
+
             return
           },
           async onSubscriptionCanceled(payload) {

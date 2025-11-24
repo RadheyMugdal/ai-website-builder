@@ -1,62 +1,57 @@
+import { db } from "@/db";
+import { user, subscription } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-import { rateLimiterFlexibleSchema } from "@/db/schema";
-import { RateLimiterDrizzle } from 'rate-limiter-flexible'
-import { drizzle } from "drizzle-orm/neon-serverless";
+export type Plan = "Free" | "Pro" | "Enterprise";
 
-export const db = drizzle(process.env.DATABASE_URL!);
-export type plan = "Free" | "Pro" | "Enterprise"
+export const CREDITS_PER_PLAN: Record<Plan, number> = {
+    "Free": 5,
+    "Pro": 100,
+    "Enterprise": 200
+};
 
-const CREDITS: { plan: plan, credits: number }[] = [
-    { plan: "Free", credits: 5 },
-    { plan: "Pro", credits: 100 },
-    { plan: "Enterprise", credits: 200 }
-]
+const RESET_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-const FREE_ASSETS = 5;
-export const DURATION = 30 * 24 * 60 * 60;
-const GENERATION_COST = 1;
+export async function getUsageStatus(userId: string) {
+    const userData = await db.select().from(user).where(eq(user.id, userId)).limit(1);
 
-export async function getUsageTracker(plan: plan) {
-    const usageTracker = new RateLimiterDrizzle({
-        storeClient: db,
-        schema: rateLimiterFlexibleSchema,
-        duration: DURATION,
-        points: CREDITS.find(c => c.plan === plan)?.credits,
+    if (userData.length === 0) throw new Error("User not found");
+    const userRecord = userData[0];
 
-    })
+    // Fetch subscription separately
+    const userSubscription = await db.select().from(subscription).where(eq(subscription.userId, userId)).limit(1);
 
+    const currentPlan: Plan = (userSubscription[0]?.status as Plan) || "Free";
+    const now = new Date();
+    const lastReset = new Date(userRecord.lastResetDate);
 
-    return usageTracker
+    // Check if we need to reset credits (Lazy Reset)
+    if (now.getTime() - lastReset.getTime() > RESET_INTERVAL_MS) {
+        const newCredits = CREDITS_PER_PLAN[currentPlan];
+
+        await db.update(user)
+            .set({
+                credits: newCredits,
+                lastResetDate: now
+            })
+            .where(eq(user.id, userId));
+
+        return { credits: newCredits, plan: currentPlan };
+    }
+
+    return { credits: userRecord.credits, plan: currentPlan };
 }
 
-// export async function consumeCredits() {
-//     const data = await auth.api.getSession({ headers: await headers() })
-//     if (!data?.user.id) {
-//         throw new Error("User not authenticated");
-//     }
-//     const usageTracker = await getUsageTracker()
-//     const result = await usageTracker.consume(data.user.id, GENERATION_COST)
-//     return result
-// }
+export async function consumeCredits(userId: string) {
+    const status = await getUsageStatus(userId);
 
-// export async function getUsageStatus() {
-//     const data = await auth.api.getSession({ headers: await headers() })
-//     if (!data?.user.id) {
-//         throw new Error("User not authenticated");
-//     }
-//     const usageTracker = await getUsageTracker()
-//     const result = await usageTracker.get(data.user.id)
-//     return result
-// }
+    if (status.credits <= 0) {
+        return { success: false, message: "Insufficient credits" };
+    }
 
-export async function getUsageStatusByUserId(userId: string, plan: "Free" | "Pro" | "Enterprise") {
-    const usageTracker = await getUsageTracker(plan)
-    const result = await usageTracker.get(userId)
-    return result
-}
+    await db.update(user)
+        .set({ credits: status.credits - 1 })
+        .where(eq(user.id, userId));
 
-export async function consumeUserIdCredit(userId: string, plan: "Free" | "Pro" | "Enterprise") {
-    const usageTracker = await getUsageTracker(plan)
-    const result = await usageTracker.consume(userId, GENERATION_COST)
-    return result
+    return { success: true, remaining: status.credits - 1 };
 }
