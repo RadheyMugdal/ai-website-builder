@@ -3,94 +3,183 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
+  DropdownMenuItem, DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+
 import {
   PromptInput,
   PromptInputAction,
   PromptInputActions,
   PromptInputTextarea,
 } from "@/components/ui/prompt-input";
-import { Separator } from "@/components/ui/separator";
 import {
   ArrowUp,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Crown,
-  Loader2,
-  MonitorSmartphone,
+  ChevronLeft, Crown, MonitorSmartphone,
   Moon,
   Square,
   Sun,
-  Waves,
+  Waves
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageCard, AssistantMessageCard } from "../components/MessageCard";
 import { Messages, ProjectData } from "../../schema";
-import LoadingState from "../components/LoadingState";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { formatMsAsFutureDate } from "@/lib/utils";
 import { useTheme } from "next-themes";
-
+import { useChat, fetchServerSentEvents, UIMessage } from "@tanstack/ai-react";
+import { getTools } from "@/tools/client";
+import { clientTools } from "@tanstack/ai-client"
+import { SandboxClient } from "@codesandbox/sdk";
+import { authClient } from "@/lib/auth-client";
 const ChatView = ({
   projectData,
   messageData,
+  sandboxId,
+  client
+
 }: {
   projectData: ProjectData;
   messageData: Messages;
+  sandboxId: string
+  client: SandboxClient
+
 }) => {
   const trpc = useTRPC();
   const { setTheme } = useTheme()
   const router = useRouter();
   const queryClient = useQueryClient()
-  const [messages, setMessages] = useState<Messages>(messageData);
   const createMessage = useMutation(trpc.message.create.mutationOptions({
   }));
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: session } = authClient.useSession();
   const [input, setInput] = useState("");
-  const { data: usageData } = useSuspenseQuery(
-    trpc.pricing.getCredits.queryOptions(undefined, { refetchInterval: 2000 })
+  const consumeCredit = useMutation(trpc.pricing.consumeCredit.mutationOptions({
+    onSuccess(data, variables, onMutateResult, context) {
+      queryClient.invalidateQueries(
+        {
+          queryKey: [trpc.pricing.getCredits.queryKey],
+        }
+      )
+    },
+  }))
+  const generateInitialMessages: () => UIMessage<any>[] = () => {
+    if (messageData.length === 1) {
+      return []
+    }
+    return messageData.map((message) => {
+      return {
+        id: message.id,
+        role: message.role,
+        parts: [
+          {
+            type: "text",
+            content: message.content
+          }
+        ],
+        createdAt: new Date(message.createdAt),
 
-  )
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      const newUserMessage = await createMessage.mutateAsync({
-        message: input,
-        projectId: projectData.id,
-      });
-      setMessages([...messages, newUserMessage]);
-    } catch (error) {
-      if (createMessage.isError) {
-        toast.error(createMessage.error.message);
-        setIsLoading(false);
-        return;
+      };
+    });
+  }
+  const tools = useMemo(() => {
+    return getTools(client)
+  }, [client])
+  const cltTools = clientTools(...tools)
+  const { isLoading, error, messages, sendMessage, stop } = useChat({
+    connection: fetchServerSentEvents('/api/projects/generate'),
+    // tools: cltTools,
+    body: {
+      userId: session?.user.id,
+      sandboxId: projectData.sandboxId
+    },
+    initialMessages: generateInitialMessages(),
+    onFinish(message) {
+      if (message.role === "assistant") {
+        message.parts.forEach((part) => {
+          if (part.type === "text") {
+            consumeCredit.mutate()
+            createMessage.mutateAsync({
+              message: part.content,
+              projectId: projectData.id,
+              role: "assistant"
+            })
+          }
+        })
+      }
+    },
+  })
+  // Streaming generation
+
+  useEffect(() => {
+    if (messageData.length === 1 && messages.length === 0) {
+      if (messageData[0].role === "user") {
+        const content = messageData[0].content
+        if (!content.trim() || isLoading || !sandboxId) {
+          return
+        }
+        sendMessage(content)
       }
     }
-    setInput("");
-    setIsLoading(false);
+  }, [messageData, messages])
+
+  const handleSend = async (message: string) => {
+    const messageToSend = message.trim()
+    if (!messageToSend.trim() || isLoading) {
+      return;
+    }
+    if (!sandboxId) {
+      return
+    }
+    await createMessage.mutateAsync({
+      message: messageToSend,
+      projectId: projectData.id,
+      role: "user"
+    })
+
+    if (createMessage.isError) {
+      toast.error(createMessage.error.message)
+    }
+
+    sendMessage(message)
   };
+
+  const handleInputSubmit = useCallback(
+    () => {
+      handleSend(input);
+      setInput("");
+    },
+    [handleSend]
+  );
+
   const { data: subscriptionData } = useSuspenseQuery(
     trpc.pricing.getCurrentSubscription.queryOptions()
   )
-  useEffect(() => {
-    setMessages(messageData);
-  }, [messageData]);
+  const { data: credits } = useSuspenseQuery(
+    trpc.pricing.getCredits.queryOptions()
+  )
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+
+  // Show error toast
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message);
+    }
+  }, [error]);
+  const stopStreaming = () => {
+    stop()
+  }
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -121,7 +210,7 @@ const ChatView = ({
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem onClick={() => setTheme("light")}>
-                    <Sun />Light</DropdownMenuItem>
+                    <Sun className=" text-white" />Light</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme("dark")}>
                     <Moon />
                     Dark</DropdownMenuItem>
@@ -145,21 +234,28 @@ const ChatView = ({
       <div className="flex flex-col flex-1 overflow-hidden px-4 py-2 relative">
         <div className="absolute  flex justify-between items-center top-0 left-0 right-0   border-b bg-background py-2 px-4">
           <div className="flex items-center justify-between w-full">
-            <p className="text-xs font-semibold">{usageData?.credits} Credits remaining</p>
+            <p className="text-xs font-semibold">{credits.credits} Credits remaining</p>
             {/* <span className="text-xs opacity-75">Resets at {formatMsAsFutureDate(usageData.!)}</span> */}
           </div>
         </div>
         {/* Scrollable messages */}
         <div className="flex-1 mt-8 overflow-y-auto flex flex-col gap-4 pr-2">
-          {messages.map((message, index) => {
-            if (message.role === "assistant") {
-              return <AssistantMessageCard key={index} message={message} />;
-            } else {
-              return <MessageCard key={index} message={message} />;
-            }
-          })}
-          {messages[messages.length - 1].role === "user" &&
-            projectData.status === "generating" && <LoadingState />}
+          {
+            messages.length > 0 && (
+              <>
+                {
+                  messages.map((message) => {
+                    if (message.role === "assistant") {
+                      return <AssistantMessageCard key={message.id} message={message} />;
+                    } else {
+                      return <MessageCard key={message.id} message={message} />;
+                    }
+                  })
+                }
+
+              </>
+            )
+          }
           <div ref={messagesEndRef} />
         </div>
 
@@ -170,7 +266,7 @@ const ChatView = ({
             value={input}
             onValueChange={setInput}
             isLoading={isLoading}
-            onSubmit={handleSubmit}
+            onSubmit={handleInputSubmit}
             className="relative"
           >
 
@@ -180,14 +276,15 @@ const ChatView = ({
                 tooltip={isLoading ? "Stop generation" : "Send message"}
               >
                 <Button
-                  onClick={handleSubmit}
+                  onClick={isLoading ? stopStreaming : handleInputSubmit}
                   size="icon"
                   className="h-8 w-8 rounded-full"
+                  disabled={!input.trim() && !isLoading}
                 >
                   {isLoading ? (
-                    <Loader2 className="size-5 animate-spin " />
+                    <Square className="size-4" />
                   ) : (
-                    <ArrowUp className="size-5  " />
+                    <ArrowUp className="size-5" />
                   )}
                 </Button>
               </PromptInputAction>

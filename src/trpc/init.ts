@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { subscription } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { getUsageStatus } from "@/lib/usage";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -34,30 +35,21 @@ export const protectedProcedure = baseProcedure.use(async ({ ctx, next }) => {
   if (!session) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
   }
-  let subscriptionStatus: "Free" | "Pro" | "Enterprise" = "Free";
-  try {
-    const [userSubscription] = await db
-      .select({
-        status: subscription.status,
-      })
-      .from(subscription)
-      .where(eq(subscription.userId, session.user.id));
 
-    subscriptionStatus = (userSubscription?.status ?? "Free") as
-      | "Free"
-      | "Pro"
-      | "Enterprise";
-  } catch (error) {
-    // If subscription query fails, default to "Free"
-    console.error("Failed to fetch user subscription:", error);
-    subscriptionStatus = "Free";
-  }
 
   return next({
     ctx: {
       ...ctx,
       auth: session,
-      subscriptionStatus,
     },
   });
 });
+
+
+export const premiumProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const usage = await getUsageStatus(ctx.auth.user.id);
+  if (usage?.credits === 0) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Not enough credits" });
+  }
+  return next();
+})

@@ -24,6 +24,7 @@ const page = async ({ params }: Props) => {
   void queryClient.prefetchQuery(
     trpc.pricing.getCredits.queryOptions()
   )
+
   void queryClient.prefetchQuery(
     trpc.project.getById.queryOptions({ id: projectId })
   );
@@ -31,9 +32,7 @@ const page = async ({ params }: Props) => {
     trpc.pricing.getCurrentSubscription.queryOptions()
   )
 
-
   return (
-
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ErrorBoundary fallback={<ErrorState title="Failed to load project" description="Please try again later" />}>
         <Suspense fallback={<Loader />}>
