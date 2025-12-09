@@ -10,7 +10,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Check, Copy, FileCode, FileIcon, FolderIcon, FolderOpenIcon } from "lucide-react";
@@ -560,6 +560,8 @@ export default function ComponentFileViewer({
                   lang={selected.path.split(".").pop() || "txt"}
                   className="min-h-full"
                 />
+                <ScrollBar orientation="horizontal" />
+                <ScrollBar orientation="vertical" />
               </ScrollArea>
             </div>
           </div>

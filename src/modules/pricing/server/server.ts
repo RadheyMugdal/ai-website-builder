@@ -1,5 +1,5 @@
 import { polarClient } from "@/lib/polar";
-import { getUsageStatus } from "@/lib/usage";
+import { consumeCredits, getUsageStatus } from "@/lib/usage";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 
 export const pricingRouter = createTRPCRouter({
@@ -25,5 +25,9 @@ export const pricingRouter = createTRPCRouter({
     getCredits: protectedProcedure.query(async ({ ctx }) => {
         const usage = await getUsageStatus(ctx.auth.user.id)
         return usage
+    }),
+    consumeCredit: protectedProcedure.mutation(async ({ ctx }) => {
+        await consumeCredits(ctx.auth.user.id)
+        return true
     })
 })

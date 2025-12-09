@@ -1,17 +1,24 @@
 import { db } from "@/db";
 import { message, project } from "@/db/schema";
-import { inngest } from "@/inngest/client";
+
 import { polarClient } from "@/lib/polar";
-import { templateFiles } from "@/lib/template";
+
 import { getUsageStatus } from "@/lib/usage";
 import { DEFAULT_PAGE_SIZE } from "@/modules/chat/constants";
-import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { Daytona, Sandbox } from "@daytonaio/sdk";
+import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, like, lt, or, sql } from "drizzle-orm";
+import { CodeSandbox } from '@codesandbox/sdk'
+
 import z from "zod";
 
+const csb_api_key = process.env.CODESANDBOX_KEY as string
+
+const sdk = new CodeSandbox(csb_api_key)
+
+
 export const projectRouter = createTRPCRouter({
+
   getUserProjects: protectedProcedure
     .input(
       z.object({
@@ -58,51 +65,54 @@ export const projectRouter = createTRPCRouter({
         nextCursor: nextCursor ?? null,
       };
     }),
-  create: protectedProcedure
+  create: premiumProcedure
     .input(z.object({ prompt: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const usage = await getUsageStatus(
-        ctx.auth.user.id
-      );
-      if (usage?.credits === 0) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Not enough credits",
-        });
-      }
-      const [createdProject] = await db
-        .insert(project)!
-        .values({
-          files: templateFiles,
-          userId: ctx.auth.user.id,
-        })
-        .returning({
-          id: project.id,
-        });
 
-      if (!createdProject) {
+      try {
+
+        const sandbox = await sdk.sandboxes.create({
+          id: "pt_7x1pQKjPA8H6ZHZGd5htWY",
+          hibernationTimeoutSeconds: 300,
+        })
+
+        const [createdProject] = await db
+          .insert(project)!
+          .values({
+            files: {},
+            userId: ctx.auth.user.id,
+            sandboxId: sandbox.id,
+          })
+          .returning({
+            id: project.id,
+          });
+        if (!createdProject) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create project",
+          });
+        }
+
+        const createdMessage = await db.insert(message).values({
+          projectId: createdProject.id,
+          content: input.prompt,
+          role: "user",
+        }).returning({
+          id: message.id,
+        })
+
+        return {
+          id: createdProject.id,
+        };
+      } catch (error) {
+        console.error(error)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create project",
-        });
+        })
       }
-
-      const createdMessage = await db.insert(message).values({
-        projectId: createdProject.id,
-        content: input.prompt,
-        role: "user",
-      });
-      await inngest.send({
-        name: "code/generate",
-        data: {
-          prompt: input.prompt,
-          projectId: createdProject.id,
-        },
-      });
-      return {
-        id: createdProject.id,
-      };
     }),
+
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -117,26 +127,6 @@ export const projectRouter = createTRPCRouter({
           code: "NOT_FOUND",
           message: "Project not found",
         });
-      }
-      const daytona = new Daytona({
-        apiKey: process.env.DAYTONA_API_KEY,
-        apiUrl: process.env.DAYTONA_API_URL,
-        target: "us",
-      });
-
-      if (existingProject.sandboxId) {
-        const sandbox = await daytona.get(existingProject.sandboxId);
-        const previewlink = await sandbox.getPreviewLink(3000);
-        await db
-          .update(project)
-          .set({ previewUrl: previewlink.url })
-          .where(eq(project.id, id));
-
-        if (sandbox.state === "archived") {
-          await daytona.start(sandbox);
-        } else if (sandbox.state === "started") {
-          sandbox.process.executeCommand("true");
-        }
       }
 
       const messages = await db
@@ -155,15 +145,15 @@ export const projectRouter = createTRPCRouter({
       const projectToDelete = await db
         .select()
         .from(project)
-        .where(eq(project.id, input.id));
-
+        .where(eq(project.id, input.id))
       if (!projectToDelete) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Project not found",
         });
       }
-
+      await sdk.sandboxes.shutdown(projectToDelete[0].sandboxId as string)
+      await sdk.sandboxes.delete(projectToDelete[0].sandboxId as string)
       await db.delete(project).where(eq(project.id, input.id));
 
       return { success: true };
