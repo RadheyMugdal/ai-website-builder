@@ -16,9 +16,16 @@ export const pricingRouter = createTRPCRouter({
     }),
     getCurrentSubscription: protectedProcedure.query(async ({ ctx }) => {
         const subData = await db.select().from(subscription).where(eq(subscription.userId, ctx.auth.user.id)).limit(1)
+        const polarSubscription = await polarClient.subscriptions.list({
+            externalCustomerId: ctx.auth.user.id,
+        });
 
+        const activeSubscription = polarSubscription.result.items.find(
+            (s) => s.status === "active"
+        );
         return {
             subscription: subData,
+            polarSubscriptionProduct: activeSubscription?.product ?? null
         }
     }),
     getCredits: protectedProcedure.query(async ({ ctx }) => {

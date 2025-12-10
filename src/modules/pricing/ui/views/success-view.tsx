@@ -46,20 +46,20 @@ export default function SuccessView() {
                     <Logo />
                 </div>
                 <h1 className="text-3xl font-bold my-4">
-                    🎉 Thank you for subscribing to the {data.name} Plan!
+                    🎉 Thank you for subscribing to the {data.subscription[0].status} Plan!
                 </h1>
 
                 <p className="text-lg  opacity-75 mb-6">
-                    Your payment was successful. You now have full access to all premium features of the {data.name} plan.
+                    Your payment was successful. You now have full access to all premium features of the {data.subscription[0].status} plan.
                 </p>
 
-                {data.benefits?.length > 0 && (
+                {data?.polarSubscriptionProduct && data?.polarSubscriptionProduct.benefits.length > 0 && (
                     <div className="mb-6 w-full p-4 border rounded-lg shadow-sm">
                         <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
                             🚀 Enjoy these benefits:
                         </h3>
                         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
-                            {data.benefits.map((benefit, index) => (
+                            {data?.polarSubscriptionProduct.benefits.map((benefit, index) => (
                                 <li key={index} className="flex items-center text-sm gap-2">
                                     <Check className="size-4 text-green-500" />
                                     {benefit.description}
