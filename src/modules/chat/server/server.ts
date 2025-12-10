@@ -1,17 +1,18 @@
 import { db } from "@/db";
 import { message, project } from "@/db/schema";
+import { inngest } from "@/inngest/client";
 import { getUsageStatus } from "@/lib/usage";
-import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
+import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import z from "zod";
 
 export const messageRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(z.object({ message: z.string(), projectId: z.string(), role: z.enum(["user", "assistant"]) }))
+    .input(z.object({ message: z.string(), projectId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const usage = await getUsageStatus(ctx.auth.user.id)
-      if (usage?.credits <= 0) {
+      if (usage?.credits === 0) {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
           message: "Not enough credits",
@@ -38,7 +39,7 @@ export const messageRouter = createTRPCRouter({
         .values({
           content: input.message,
           projectId: input.projectId,
-          role: input.role,
+          role: "user",
         })
         .returning();
       if (!createdMessage) {
@@ -51,9 +52,15 @@ export const messageRouter = createTRPCRouter({
         .select()
         .from(message)
         .where(eq(message.projectId, input.projectId));
-
+      await inngest.send({
+        name: "code/generate",
+        data: {
+          prompt: input.message,
+          projectId: input.projectId,
+          sandboxId: existingProject.sandboxId,
+          plan: ctx.subscriptionStatus
+        },
+      });
       return createdMessage;
     }),
-
-
 });
