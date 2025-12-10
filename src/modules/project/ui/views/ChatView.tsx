@@ -96,7 +96,6 @@ const ChatView = ({
     connection: fetchServerSentEvents('/api/projects/generate'),
     // tools: cltTools,
     body: {
-      userId: session?.user.id,
       sandboxId: projectData.sandboxId
     },
     initialMessages: generateInitialMessages(),

@@ -154,7 +154,7 @@ const ToolCall = ({ name, args }: { name: string; args: string }) => {
   } catch (e) {
     // Fallback
   }
-
+  console.log(parsedArgs)
   const getToolConfig = (toolName: string) => {
     switch (toolName) {
       case "create-file": return { icon: FilePlus, label: "Create File", color: "text-green-500" };
@@ -188,7 +188,7 @@ const ToolCall = ({ name, args }: { name: string; args: string }) => {
 };
 
 // --- Main Assistant Card ---
-const AssistantMessageCard = ({ message }: { message: UIMessage<any> }) => {
+const AssistantMessageCard = ({ message, isLoading }: { message: UIMessage<any>, isLoading?: boolean }) => {
   return (
     <div className="flex gap-4 w-full max-w-3xl group items-start mb-6">
       <Avatar className="mt-1 h-8 w-8 border">
@@ -204,6 +204,9 @@ const AssistantMessageCard = ({ message }: { message: UIMessage<any> }) => {
         </div>
 
         <div className="text-sm leading-relaxed">
+          {isLoading && message.parts.length === 0 && (
+            <span className=" text-xs text-muted-foreground">🧠 Processing your request...</span>
+          )}
           {message.parts.map((part, idx) => {
             if (part.type === "thinking") {
               return <ThinkingProcess key={`thinking-${idx}`} content={part.content} />;

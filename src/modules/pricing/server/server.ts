@@ -1,6 +1,9 @@
+import { db } from "@/db";
+import { subscription } from "@/db/schema";
 import { polarClient } from "@/lib/polar";
 import { consumeCredits, getUsageStatus } from "@/lib/usage";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { eq } from "drizzle-orm";
 
 export const pricingRouter = createTRPCRouter({
     getProducts: baseProcedure.query(async ({ }) => {
@@ -12,15 +15,11 @@ export const pricingRouter = createTRPCRouter({
         return products.result.items;
     }),
     getCurrentSubscription: protectedProcedure.query(async ({ ctx }) => {
-        const subscription = await polarClient.subscriptions.list({
-            externalCustomerId: ctx.auth.user.id,
-        });
+        const subData = await db.select().from(subscription).where(eq(subscription.userId, ctx.auth.user.id)).limit(1)
 
-        const activeSubscription = subscription.result.items.find(
-            (s) => s.status === "active"
-        );
-
-        return activeSubscription?.product ?? null;
+        return {
+            subscription: subData,
+        }
     }),
     getCredits: protectedProcedure.query(async ({ ctx }) => {
         const usage = await getUsageStatus(ctx.auth.user.id)

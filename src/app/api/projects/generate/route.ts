@@ -6,6 +6,8 @@ import { openai, OpenAIConfig } from "@tanstack/ai-openai";
 import { PROMPT } from "@/lib/prompt";
 import { getTools } from "@/tools/server";
 import { getUsageStatus } from "@/lib/usage";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 const config: OpenAIConfig = {
     apiKey: process.env.OPENAI_API_KEY!,
@@ -15,7 +17,14 @@ const config: OpenAIConfig = {
 export async function POST(req: NextRequest) {
     try {
         const { data, messages } = await req.json();
-        const usage = await getUsageStatus(data.userId)
+        const session = await auth.api.getSession({
+            headers: await headers()
+        })
+
+        if (!session?.user || !session.session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        const usage = await getUsageStatus(session.user.id)
         if (usage.credits <= 0) {
             return NextResponse.json({ error: "Not enough credits" }, { status: 400 });
         }
