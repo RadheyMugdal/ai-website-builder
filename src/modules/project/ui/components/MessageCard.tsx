@@ -154,7 +154,6 @@ const ToolCall = ({ name, args }: { name: string; args: string }) => {
   } catch (e) {
     // Fallback
   }
-  console.log(parsedArgs)
   const getToolConfig = (toolName: string) => {
     switch (toolName) {
       case "create-file": return { icon: FilePlus, label: "Create File", color: "text-green-500" };

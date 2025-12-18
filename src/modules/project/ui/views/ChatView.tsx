@@ -98,12 +98,16 @@ const ChatView = ({
     body: {
       sandboxId: projectData.sandboxId
     },
+    onChunk(chunk) {
+      if (chunk.type === "done") {
+        consumeCredit.mutate()
+      }
+    },
     initialMessages: generateInitialMessages(),
     onFinish(message) {
       if (message.role === "assistant") {
         message.parts.forEach((part) => {
           if (part.type === "text") {
-            consumeCredit.mutate()
             createMessage.mutateAsync({
               message: part.content,
               projectId: projectData.id,
