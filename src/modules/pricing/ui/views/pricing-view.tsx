@@ -54,7 +54,7 @@ const PricingView = () => {
                         const isHighlighted = product.metadata.variant === "highlighted"
                         const priceAmount = isFree ? "Free" : `$${price.priceAmount / 100}`
                         const recurringInterval = isFree ? "" : `/${price.recurringInterval}`
-                        const isCurrentSubscription = currentSubscription?.id === product.id
+                        const isCurrentSubscription = currentSubscription?.subscription[0].status === product.name
                         return (
                             <PricingCard
                                 key={product.id}
