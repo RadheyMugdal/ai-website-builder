@@ -68,10 +68,13 @@ const ProjectView = ({ projectId }: props) => {
   }
 
   return (
-    <main className=" w-screen h-screen">
+    <main className="w-screen h-screen">
       <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={40} minSize={30} className=" h-full">
-          <ChatView messageData={data.messages} client={client as SandboxClient} projectData={data.project} sandboxId={client?.id as string} />
+        <ResizablePanel defaultSize={40} minSize={30} className="h-full">
+          <ChatView
+            projectData={data.project}
+            sandboxId={data.project.sandboxId as string}
+          />
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={60}>

@@ -1,13 +1,11 @@
 import { db } from "@/db";
-import { message, project } from "@/db/schema";
+import {  project } from "@/db/schema";
 
-import { polarClient } from "@/lib/polar";
-
-import { getUsageStatus } from "@/lib/usage";
+import { generateId } from "ai";
 import { DEFAULT_PAGE_SIZE } from "@/modules/chat/constants";
 import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, like, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, lt, or } from "drizzle-orm";
 import { CodeSandbox } from '@codesandbox/sdk'
 
 import z from "zod";
@@ -76,30 +74,32 @@ export const projectRouter = createTRPCRouter({
           hibernationTimeoutSeconds: 300,
         })
 
+        const initialMessages = [
+          {
+            id: generateId(),
+            role: "user" as const,
+            parts: [{ type: "text" as const, text: input.prompt }],
+          },
+        ];
+
         const [createdProject] = await db
-          .insert(project)!
+          .insert(project)
           .values({
             files: {},
             userId: ctx.auth.user.id,
             sandboxId: sandbox.id,
+            messages: initialMessages,
           })
           .returning({
             id: project.id,
           });
+
         if (!createdProject) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Failed to create project",
           });
         }
-
-        const createdMessage = await db.insert(message).values({
-          projectId: createdProject.id,
-          content: input.prompt,
-          role: "user",
-        }).returning({
-          id: message.id,
-        })
 
         return {
           id: createdProject.id,
@@ -129,14 +129,10 @@ export const projectRouter = createTRPCRouter({
         });
       }
 
-      const messages = await db
-        .select()
-        .from(message)
-        .where(eq(message.projectId, id));
+    
 
       return {
         project: existingProject,
-        messages: messages ?? [],
       };
     }),
   deleteById: protectedProcedure

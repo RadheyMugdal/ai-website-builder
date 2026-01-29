@@ -113,23 +113,10 @@ export const project = pgTable("project", (t) => ({
   updatedAt: timestamp("updated_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
+  messages:jsonb("messages").notNull().default("[]"),
 }));
 
-export const roleEnum = pgEnum("role", ["user", "assistant"]);
-export const message = pgTable("message", (t) => ({
-  id: t.uuid("id").primaryKey().defaultRandom(),
-  projectId: t.uuid("project_id")
-    .notNull()
-    .references(() => project.id, { onDelete: "cascade" }),
-  role: roleEnum("role").notNull(),
-  content: text("content").notNull(),
-  createdAt: timestamp("created_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-  updatedAt: timestamp("updated_at")
-    .$defaultFn(() => /* @__PURE__ */ new Date())
-    .notNull(),
-}));
+
 
 
 export const rateLimiterFlexibleSchema = pgTable('RateLimiterFlexible', {
