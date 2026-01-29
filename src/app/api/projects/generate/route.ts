@@ -1,6 +1,6 @@
 import { CodeSandbox } from "@codesandbox/sdk";
 import { NextRequest, NextResponse } from "next/server";
-import { convertToModelMessages, stepCountIs, streamText, validateUIMessages } from "ai";
+import { convertToModelMessages, stepCountIs, streamText, ToolLoopAgent, validateUIMessages } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { PROMPT } from "@/lib/prompt";
 import { getTools } from "@/tools";
@@ -73,15 +73,20 @@ export async function POST(req: NextRequest) {
       tools: tools as Parameters<typeof validateUIMessages>[0]["tools"]
     });
 
-
-    // Stream the AI response with tool calling support
-    const result = streamText({
+    const websiteBuilderAgent=new ToolLoopAgent({
       model,
       tools,
-      stopWhen: stepCountIs(20),    
-      system: PROMPT,
+      instructions: PROMPT,
+      stopWhen: [
+        stepCountIs(20),
+      ],
+    })
+    
+    const result=await websiteBuilderAgent.stream({
       messages: await convertToModelMessages(validatedMessages)
-    });
+
+    })
+ 
 
     // Return a UI message stream response that DefaultChatTransport can parse
     return result.toUIMessageStreamResponse({
