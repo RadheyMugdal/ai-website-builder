@@ -76,7 +76,10 @@ export async function POST(req: NextRequest) {
     const websiteBuilderAgent=new ToolLoopAgent({
       model,
       tools,
-      instructions: PROMPT,
+      instructions: {
+        role:"system",
+        content:PROMPT
+      },
       stopWhen: [
         stepCountIs(20),
       ],
