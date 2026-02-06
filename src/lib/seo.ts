@@ -1,5 +1,5 @@
 export const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://wavely.ai";
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://wavelybuilder.vercel.app";
 
 export const seo = {
   name: "Wavely",
@@ -27,7 +27,7 @@ export const seo = {
     images: [
       {
         url: `${
-          process.env.NEXT_PUBLIC_SITE_URL || "https://wavely.ai"
+          process.env.NEXT_PUBLIC_SITE_URL || "https://wavelybuilder.vercel.app"
         }/wavely-logo.png`,
         width: 1200,
         height: 630,
