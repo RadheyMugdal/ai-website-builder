@@ -1,9 +1,6 @@
-import { db } from "@/db";
-import { subscription } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getUsageStatus } from "@/lib/usage";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 // import superjson from "superjson";
 import { cache } from "react";
