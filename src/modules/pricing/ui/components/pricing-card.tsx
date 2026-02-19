@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Flame } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface PricingCardProps {
@@ -47,55 +46,70 @@ const PricingCard = ({
     return (
         <div
             className={cn(
-                "rounded-lg h-full relative bg-card border p-4 gap-6 flex flex-col",
-                {
-                    " overflow-hidden": highlighted,
-                }
+                "relative h-full flex flex-col overflow-hidden rounded-2xl border transition-all duration-300",
+                !highlighted && " hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1",
+                highlighted && " from-primary/10 to-background border-primary/50 shadow-xl shadow-primary/10"
             )}
         >
             {highlighted && (
-                <div className="flex absolute items-center gap-1 text-primary-foreground text-sm top-0 right-0 bg-primary p-2">
-                    <Flame className="size-4" />
-                    Popular
+                <div className="absolute top-0 right-0 bg-gradient-to-l from-primary to-primary/80 text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-bl-lg flex items-center gap-1.5">
+                    <Sparkles className="size-3" />
+                    Most Popular
                 </div>
             )}
 
-            <div className="flex flex-col gap-1">
-                <h2 className=" text-xl md:text-2xl font-semibold">{name}</h2>
-                <p className="opacity-75 text-sm">{description}</p>
-            </div>
-            <div className=" flex flex-col gap-6">
-                <div className=" my-2">
-                    <span className="flex flex-col justify-center gap-2 items-center">
-                        <span className="font-bold text-5xl md:text-6xl">{price}</span>
-                        <span className="text-sm">{recurringInterval}</span>
-                    </span>
+            <div className="p-6 flex flex-col h-full">
+                <div className="mb-6">
+                    <h2 className="text-2xl font-bold tracking-tight mb-2">{name}</h2>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
+                </div>
+
+                <div className="mb-8">
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-5xl font-bold tracking-tighter">{price}</span>
+                        {price !== "Free" && (
+                            <span className="text-muted-foreground text-sm">/{recurringInterval}</span>
+                        )}
+                    </div>
                 </div>
 
                 <Button
                     disabled={isLoggedIn && name === "Free"}
-                    variant={highlighted ? "default" : "secondary"}
+                    variant={highlighted ? "default" : "outline"}
+                    size="lg"
+                    className={cn(
+                        "w-full mb-8 font-medium transition-all duration-300",
+                        !highlighted && "hover:bg-primary hover:text-primary-foreground"
+                    )}
                     onClick={handleClick}
                 >
                     {isCurrentSubscription
                         ? name === "Free"
                             ? "Current plan"
-                            : "Mange subscription"
+                            : "Manage subscription"
                         : name === "Free"
-                            ? "Start for Free"
-                            : `Upgrade to ${name}`}
+                            ? "Start for free"
+                            : `Get started`}
                 </Button>
-            </div>
-            <Separator />
-            <div className="space-y-3">
-                <h4>Features</h4>
-                <div className="flex flex-col gap-3">
-                    {benefits.map((benefit) => (
-                        <div className="flex gap-2 items-center" key={benefit.id}>
-                            <CheckCircle2 className="size-4 text-green-500 opacity-70 " />
-                            <p className=" text-sm opacity-70">{benefit.description}</p>
-                        </div>
-                    ))}
+
+                <div className="flex-1">
+                    <h4 className="text-sm font-semibold mb-4 text-foreground/80">What's included</h4>
+                    <div className="space-y-3">
+                        {benefits.map((benefit) => (
+                            <div className="flex gap-3 items-start group" key={benefit.id}>
+                                <div className={cn(
+                                    "rounded-full p-0.5 mt-0.5 transition-colors",
+                                    highlighted ? "bg-primary/20" : "bg-primary/10 group-hover:bg-primary/20"
+                                )}>
+                                    <Check className={cn(
+                                        "size-3.5",
+                                        highlighted ? "text-primary" : "text-primary"
+                                    )} />
+                                </div>
+                                <p className="text-sm text-muted-foreground leading-relaxed">{benefit.description}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

@@ -46,7 +46,7 @@ const ChatView = () => {
     setInput(value);
   };
   return (
-    <div className=" w-full max-w-3xl">
+    <div className=" w-full max-w-[700px]">
       <PromptInput
         value={input}
         onValueChange={handleValueChange}
@@ -54,7 +54,7 @@ const ChatView = () => {
         onSubmit={handleSubmit}
         className=" w-full"
       >
-        <PromptInputTextarea placeholder="Describe your website idea — I&apos;ll build it for you." />
+        <PromptInputTextarea placeholder="Create Todo app for me" />
         <PromptInputActions className="justify-end pt-2">
           <PromptInputAction
             tooltip={isLoading ? "Generating project..." : "Send message"}

@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono,Funnel_Sans } from "next/font/google";
 import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -13,8 +13,8 @@ import {
   organizationJsonLd,
   websiteJsonLd,
 } from "@/lib/seo";
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const funnel_sans = Funnel_Sans({
+  variable: "--font-funnel-sans",
   subsets: ["latin"],
 });
 
@@ -79,7 +79,7 @@ export default function RootLayout({
       </head>
       <TRPCReactProvider>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${funnel_sans.variable} ${geistMono.variable} antialiased`}
         >
           <ThemeProvider
             attribute="class"
