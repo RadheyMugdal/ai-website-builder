@@ -1,4 +1,5 @@
-"use client";;
+"use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,101 +30,124 @@ const Header = ({ isLoggedIn }: Props) => {
   };
 
   return (
-    <header className="px-6 py-4  bg-background">
-      <div className="flex items-center justify-between">
-        {/* Left: Logo & Desktop Nav */}
-        <div className="flex items-center  gap-8">
-          <Logo />
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          {/* Left: Logo & Desktop Nav */}
+          <div className="flex items-center gap-6 sm:gap-8">
+            <Logo />
 
-          <nav className="hidden md:block">
-            <ul className="flex gap-6  items-center  justify-center ">
-              {navLinks.map(({ href, label }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className={
-                      clsx(
-                        " opacity-80 hover:opacity-100 transition-colors",
-                        pathname === href && " opacity-100  underline-offset-8 underline  font-semibold"
+            <nav className="hidden md:flex">
+              <ul className="flex items-center gap-1">
+                {navLinks.map(({ href, label }) => (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className={clsx(
+                        "rounded-md px-4 py-2 text-sm font-medium transition-all duration-200",
+                        "hover:bg-accent hover:text-accent-foreground",
+                        pathname === href
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
 
-                      )
-                    }
-
-                  >
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-
-        {/* Right: Auth or User */}
-        <div className="hidden md:flex items-center gap-3">
-          <ModeToggle />
-          {isLoggedIn ? (
-            <UserButton />
-          ) : (
-            <>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => router.push("/sign-in")}
-              >
-                Login
-              </Button>
-              <Button size="sm" onClick={() => router.push("/sign-up")}>
-                Get Started
-              </Button>
-            </>
-          )}
-        </div>
-
-        {/* Mobile Menu Toggle */}
-        <button
-          type="button"
-          aria-label="Toggle menu"
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="md:hidden p-2 rounded-md hover:bg-muted"
-        >
-          {isOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {
-        isOpen && (
-          <div className="md:hidden mt-4 border-t pt-4">
-            <ul className="flex flex-col gap-4 text-sm font-medium">
-              {navLinks.map(({ href, label }) => (
-                <li key={href}>
-                  <button
-                    onClick={() => handleLinkClick(href)}
-                    className="w-full text-left px-2 py-1 hover:underline hover:text-accent"
-                  >
-                    {label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {!isLoggedIn && (
-              <div className="mt-6 flex flex-col gap-3">
+          {/* Right: Auth or User */}
+          <div className="hidden md:flex items-center gap-2">
+            <ModeToggle />
+            {isLoggedIn ? (
+              <UserButton />
+            ) : (
+              <>
                 <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleLinkClick("/sign-in")}
+                  variant="ghost"
+                  onClick={() => router.push("/sign-in")}
+                  className="text-sm"
                 >
                   Login
                 </Button>
-                <Button size="sm" onClick={() => handleLinkClick("/sign-in")}>
+                <Button
+                  onClick={() => router.push("/sign-up")}
+                  className="text-sm"
+                >
                   Get Started
                 </Button>
-              </div>
+              </>
             )}
           </div>
-        )
-      }
-    </header >
+
+          {/* Mobile Menu Toggle */}
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="md:hidden p-2 rounded-md hover:bg-accent transition-colors"
+          >
+            {isOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isOpen && (
+          <div className="md:hidden py-4 border-t">
+            <nav className="flex flex-col gap-2">
+              {navLinks.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setIsOpen(false)}
+                  className={clsx(
+                    "rounded-md px-4 py-2.5 text-sm font-medium transition-colors",
+                    "hover:bg-accent hover:text-accent-foreground",
+                    pathname === href
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-4 flex flex-col gap-2">
+              <div className="flex items-center justify-between px-4 py-2">
+                <span className="text-sm text-muted-foreground">Theme</span>
+                <ModeToggle />
+              </div>
+              {!isLoggedIn && (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleLinkClick("/sign-in")}
+                    className="justify-start"
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    
+                    onClick={() => handleLinkClick("/sign-up")}
+                    className="w-full"
+                  >
+                    Get Started
+                  </Button>
+                </>
+              )}
+              {isLoggedIn && (
+                <div className="px-4 py-2">
+                  <UserButton />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </header>
   );
 };
 

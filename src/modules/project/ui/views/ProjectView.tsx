@@ -69,7 +69,7 @@ const ProjectView = ({ projectId }: props) => {
 
   return (
     <main className="w-screen h-screen">
-      <ResizablePanelGroup direction="horizontal">
+      <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel defaultSize={40} minSize={30} className="h-full">
           <ChatView
             projectData={data.project}

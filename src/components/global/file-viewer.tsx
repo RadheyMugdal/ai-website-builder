@@ -532,7 +532,7 @@ export default function ComponentFileViewer({
   };
   return (
     <ResizablePanelGroup
-      direction="horizontal"
+      orientation="horizontal"
       className=" h-full w-full  rounded-lg border overflow-hidden"
     >
       <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>

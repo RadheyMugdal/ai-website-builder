@@ -29,7 +29,7 @@ export function ModeToggle() {
             <DropdownMenuContent
                 align="center"
                 sideOffset={6}
-                className="min-w-[8rem] rounded-xl"
+                className="min-w-[8rem] rounded-xl bg-popover text-popover-foreground"
             >
                 <DropdownMenuItem onClick={() => setTheme("light")} className="gap-2">
                     <Sun className="h-4 w-4" />

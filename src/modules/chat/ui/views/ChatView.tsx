@@ -10,6 +10,7 @@ import { authClient } from "@/lib/auth-client";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { motion } from "motion/react";
 
 import { ArrowUp, Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -46,13 +47,22 @@ const ChatView = () => {
     setInput(value);
   };
   return (
-    <div className=" w-full max-w-[700px]">
+    <motion.div
+      className="w-full max-w-2xl mx-auto"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.5,
+        delay: 0.4,
+        ease: [0.22, 1, 0.36, 1] as const,
+      }}
+    >
       <PromptInput
         value={input}
         onValueChange={handleValueChange}
         isLoading={isLoading}
         onSubmit={handleSubmit}
-        className=" w-full"
+        className="w-full"
       >
         <PromptInputTextarea placeholder="Create Todo app for me" />
         <PromptInputActions className="justify-end pt-2">
@@ -73,7 +83,7 @@ const ChatView = () => {
           </PromptInputAction>
         </PromptInputActions>
       </PromptInput>
-    </div>
+    </motion.div>
   );
 };
 

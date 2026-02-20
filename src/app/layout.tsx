@@ -1,10 +1,11 @@
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono,Funnel_Sans } from "next/font/google";
+import { Funnel_Sans } from "next/font/google";
 import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
 
 import {
   defaultCanonical,
@@ -18,11 +19,18 @@ const funnel_sans = Funnel_Sans({
   subsets: ["latin"],
 });
 
+
+const dmSans = DM_Sans({subsets:['latin'],variable:'--font-sans'});
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -66,7 +74,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={dmSans.variable}>
       <head>
         <link rel="canonical" href={defaultCanonical("/")} />
         <script
@@ -79,7 +87,7 @@ export default function RootLayout({
       </head>
       <TRPCReactProvider>
         <body
-          className={`${funnel_sans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ThemeProvider
             attribute="class"
