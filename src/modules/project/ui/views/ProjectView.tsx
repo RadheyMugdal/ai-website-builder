@@ -76,7 +76,7 @@ const ProjectView = ({ projectId }: props) => {
             sandboxId={data.project.sandboxId as string}
           />
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle withHandle className="w-2 hover:w-3 hover:bg-muted transition-all" />
         <ResizablePanel defaultSize={60}>
           <EditorView projectData={data.project} client={client as SandboxClient} />
         </ResizablePanel>

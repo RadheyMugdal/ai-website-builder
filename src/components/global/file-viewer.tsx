@@ -535,7 +535,7 @@ export default function ComponentFileViewer({
       orientation="horizontal"
       className=" h-full w-full  rounded-lg border overflow-hidden"
     >
-      <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+      <ResizablePanel defaultSize={25} >
         <FileTree
           tree={tree}
           selectedFile={selectedFile}
@@ -544,7 +544,7 @@ export default function ComponentFileViewer({
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={75} minSize={40}>
+      <ResizablePanel defaultSize={75} minSize={60}>
         {selected && (
           <div className="h-full flex flex-col">
             <FileHeader
