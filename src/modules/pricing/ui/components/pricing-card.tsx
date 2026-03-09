@@ -68,7 +68,7 @@ const PricingCard = ({
                     <div className="flex items-baseline gap-1">
                         <span className="text-5xl font-bold tracking-tighter">{price}</span>
                         {price !== "Free" && (
-                            <span className="text-muted-foreground text-sm">/{recurringInterval}</span>
+                            <span className="text-muted-foreground text-sm">{recurringInterval}</span>
                         )}
                     </div>
                 </div>
